@@ -1,2 +1,0 @@
-# Hamza
-Personal CV website
