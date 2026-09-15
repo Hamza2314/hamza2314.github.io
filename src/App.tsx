@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
-import FaceMesh from './components/FaceMesh'
+import Scene from './components/Scene'
 import Magnetic from './components/Magnetic'
 import { profile, projects, experience, education, skills, languages } from './data'
 
@@ -72,7 +72,7 @@ export default function App() {
 
   return (
     <div ref={root}>
-      <FaceMesh src="/face.jpg" />
+      <Scene />
 
       <div className="shell">
         <header className="hero" id="top">
