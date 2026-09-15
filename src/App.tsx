@@ -118,8 +118,8 @@ export default function App() {
           <h2 className="band-label">Selected work</h2>
           <div className="band-body">
             <ol className="projects">
-              {projects.map((p) => (
-                <li className="project" key={p.title}>
+              {projects.map((p, i) => (
+                <li className="project" key={p.title} data-project={i}>
                   <div className="project-head">
                     <h3>{p.title}</h3>
                     <span className="project-status">{p.status}</span>

@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
+import { Color, Group, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import { loadFaceCloud } from './sampleFace'
 import { createFaceCloud } from './faceCloud'
+import { createProjectDeck } from './projects'
 import type { FrameContext, SceneItem } from './types'
 
 /**
@@ -68,6 +69,8 @@ export default function Stage({ reduced, visible, onContextLost }: StageProps) {
     const camera = new PerspectiveCamera(42, 1, 0.1, 100)
     camera.position.set(0, 0, 3.2)
 
+    const isMobile = window.matchMedia(MOBILE_QUERY).matches
+
     const ctx: FrameContext = {
       progress: 0,
       time: 0,
@@ -76,6 +79,9 @@ export default function Stage({ reduced, visible, onContextLost }: StageProps) {
       mouseY: 0,
       pixelRatio,
       reduced,
+      projects: [],
+      activeProject: -1,
+      projectPresence: 0,
     }
 
     function draw() {
@@ -154,9 +160,45 @@ export default function Stage({ reduced, visible, onContextLost }: StageProps) {
     ro.observe(el)
 
     // --- scroll -------------------------------------------------------------
+    // Project elements are looked up once; their rects are cheap to re-read and
+    // are only measured while at least one is near the viewport.
+    const projectEls: HTMLElement[] = isMobile
+      ? []
+      : Array.from(document.querySelectorAll<HTMLElement>('[data-project]'))
+
+    ctx.projects = new Array<number>(projectEls.length).fill(0)
+
     const measureScroll = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight
       ctx.progress = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0
+
+      const mid = window.innerHeight / 2
+      let best = -1
+      let bestDist = Infinity
+      let presence = 0
+
+      for (let i = 0; i < projectEls.length; i++) {
+        const r = projectEls[i].getBoundingClientRect()
+
+        // 0 as the element's top reaches the bottom of the viewport,
+        // 1 as its bottom clears the top.
+        const span = r.height + window.innerHeight
+        const travelled = window.innerHeight - r.top
+        ctx.projects[i] = Math.min(Math.max(travelled / span, 0), 1)
+
+        const centre = r.top + r.height / 2
+        const dist = Math.abs(centre - mid)
+
+        // Only claim the slot while the element genuinely overlaps the viewport.
+        if (r.bottom > 0 && r.top < window.innerHeight && dist < bestDist) {
+          bestDist = dist
+          best = i
+          presence = Math.max(presence, 1 - Math.min(dist / window.innerHeight, 1))
+        }
+      }
+
+      ctx.activeProject = best
+      ctx.projectPresence = presence
     }
     measureScroll()
     if (!reduced) {
@@ -183,9 +225,14 @@ export default function Stage({ reduced, visible, onContextLost }: StageProps) {
     themeQuery.addEventListener('change', onTheme)
 
     // --- content ------------------------------------------------------------
-    const maxPoints = window.matchMedia(MOBILE_QUERY).matches
-      ? MAX_POINTS_MOBILE
-      : MAX_POINTS_DESKTOP
+    const maxPoints = isMobile ? MAX_POINTS_MOBILE : MAX_POINTS_DESKTOP
+
+    // Project objects are a desktop-only feature: phones keep the face alone.
+    if (!isMobile && projectEls.length) {
+      const deck = createProjectDeck(meshColor, new Group())
+      items.push(deck)
+      scene.add(deck.object)
+    }
 
     loadFaceCloud('/face.jpg', maxPoints).then((cloud) => {
       if (disposed) return

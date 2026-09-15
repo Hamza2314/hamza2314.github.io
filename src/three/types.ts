@@ -15,6 +15,17 @@ export type FrameContext = {
   pixelRatio: number
   /** Reduced motion: hold still, ignore pointer. */
   reduced: boolean
+
+  /**
+   * Per-project progress, 0 as the section enters the viewport and 1 as it
+   * leaves. Index-aligned with `projects` in src/data.ts. Empty on mobile,
+   * where project objects are not built at all.
+   */
+  projects: number[]
+  /** Index of the project nearest the viewport centre, or -1 for none. */
+  activeProject: number
+  /** How strongly any project object is on screen, 0..1. Fades the face back. */
+  projectPresence: number
 }
 
 /**

@@ -132,7 +132,11 @@ export function createFaceCloud(cloud: PointCloud, color: Color): SceneItem {
       u.uProgress.value = ctx.progress
       u.uTime.value = ctx.time
       u.uPixelRatio.value = ctx.pixelRatio
-      u.uDim.value = keyed(KEY_DIM, ctx.progress)
+
+      // Give way while a project object holds the frame. Both sit at the
+      // origin, so the face has to recede rather than compete.
+      u.uDim.value = keyed(KEY_DIM, ctx.progress) * (1 - 0.88 * ctx.projectPresence)
+      points.position.z = -0.9 * ctx.projectPresence
 
       const turn = keyed(KEY_TURN, ctx.progress)
 
