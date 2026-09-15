@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Add-Type -AssemblyName System.IO.Compression.FileSystem; $z=[System.IO.Compression.ZipFile]::OpenRead\\(\"c:\\\\Basisordner\\\\MasriH.DVZNT1\\\\Profil\\\\Desktop\\\\portfolio\\\\files.zip\"\\); $z.Entries | Select-Object FullName, Length | Format-Table -AutoSize; $z.Dispose\\(\\))",
+      "PowerShell(node -v)",
+      "PowerShell(npm -v)",
+      "PowerShell($paths = @\\(\"$env:ProgramFiles\\\\nodejs\\\\node.exe\", \"${env:ProgramFiles\\(x86\\)}\\\\nodejs\\\\node.exe\", \"$env:LOCALAPPDATA\\\\nodejs\\\\node.exe\", \"$env:APPDATA\\\\npm\\\\node.exe\", \"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\\\\node.exe\", \"$env:USERPROFILE\\\\scoop\\\\apps\\\\nodejs\\\\current\\\\node.exe\", \"$env:LOCALAPPDATA\\\\fnm_multishells\", \"$env:APPDATA\\\\nvm\", \"$env:ProgramFiles\\\\nodejs\"\\); foreach \\($p in $paths\\) { if \\(Test-Path $p\\) { \"FOUND: $p\" } })",
+      "PowerShell(Get-ChildItem -Path \"$env:LOCALAPPDATA\", \"$env:APPDATA\", \"$env:USERPROFILE\" -Filter \"node.exe\" -Recurse -Depth 4 -ErrorAction SilentlyContinue | Select-Object -First 10 FullName)",
+      "PowerShell(\"--- Program Files ---\"; Get-ChildItem \"$env:ProgramFiles\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'node|nvm|fnm|volta' } | Select-Object Name; Get-ChildItem \"${env:ProgramFiles\\(x86\\)}\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'node|nvm|fnm|volta' } | Select-Object Name; \"--- package managers ---\"; foreach \\($c in 'winget','choco','scoop','npm.cmd'\\) { $g = Get-Command $c -ErrorAction SilentlyContinue; if \\($g\\) { \"$c -> $\\($g.Source\\)\" } else { \"$c -> not found\" } })",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://nodejs.org/dist/index.json\" -Proxy \"http://proxy.bk.dvz-mv.net:8080/\" -UseBasicParsing -TimeoutSec 25; \"PROXY OK - status $\\($r.StatusCode\\), bytes $\\($r.Content.Length\\)\" } catch { \"PROXY FAILED: $\\($_.Exception.Message\\)\" })"
+    ]
+  }
+}

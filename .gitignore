@@ -1,0 +1,17 @@
+node_modules/
+dist/
+dist-ssr/
+
+# Local archive of the original flat-layout sources, not part of the build
+files.zip
+
+*.local
+.DS_Store
+Thumbs.db
+
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+npm-debug.log*
+yarn-error.log*
