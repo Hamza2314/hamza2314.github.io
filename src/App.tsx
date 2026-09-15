@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
@@ -8,6 +8,16 @@ import { profile, projects, experience, education, skills, languages } from './d
 
 gsap.registerPlugin(ScrollTrigger)
 
+const SECTIONS = [
+  { id: 'about', label: 'About' },
+  { id: 'work', label: 'Work' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'education', label: 'Education' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'contact', label: 'Contact' },
+]
+
+/** The one deliberate entrance on the page: the name rises once, on load. */
 function SplitHeading({ text, className }: { text: string; className?: string }) {
   return (
     <h1 className={className}>
@@ -24,6 +34,7 @@ function SplitHeading({ text, className }: { text: string; className?: string })
 
 export default function App() {
   const root = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState<string>('')
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -43,24 +54,22 @@ export default function App() {
     const ctx = gsap.context(() => {
       document.body.classList.add('ready')
 
-      if (reduced) {
-        gsap.set('.reveal', { opacity: 1, y: 0 })
-        return
-      }
+      // ScrollTrigger drives the rail's current-section state. It is
+      // wayfinding, not decoration, which is why it survives reduced motion
+      // while the old blanket fade-and-rise on every section did not.
+      for (const { id } of SECTIONS) {
+        const el = document.getElementById(id)
+        if (!el) continue
 
-      gsap.utils.toArray<HTMLElement>('.reveal').forEach((el) => {
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: 18 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.7,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: el, start: 'top 88%' },
+        ScrollTrigger.create({
+          trigger: el,
+          start: 'top 45%',
+          end: 'bottom 45%',
+          onToggle: (self) => {
+            if (self.isActive) setActive(id)
           },
-        )
-      })
+        })
+      }
     }, root)
 
     return () => {
@@ -74,12 +83,20 @@ export default function App() {
     <div ref={root}>
       <Scene />
 
+      <nav className="rail" aria-label="Sections">
+        {SECTIONS.map((s) => (
+          <a key={s.id} href={`#${s.id}`} aria-current={active === s.id ? 'true' : undefined}>
+            {s.label}
+          </a>
+        ))}
+      </nav>
+
       <div className="shell">
         <header className="hero" id="top">
           <SplitHeading text={profile.name} className="hero-name" />
           <p className="hero-role">{profile.role}</p>
           <p className="hero-intro">{profile.intro}</p>
-          <nav className="hero-actions">
+          <nav className="hero-actions" aria-label="Primary">
             <Magnetic href={profile.links.cv} download>
               Download CV
             </Magnetic>
@@ -88,8 +105,8 @@ export default function App() {
           </nav>
         </header>
 
-        <section className="band reveal" id="about">
-          <div className="band-label">About</div>
+        <section className="band" id="about">
+          <h2 className="band-label">About</h2>
           <div className="band-body prose">
             {profile.about.map((p, i) => (
               <p key={i}>{p}</p>
@@ -98,13 +115,13 @@ export default function App() {
         </section>
 
         <section className="band" id="work">
-          <div className="band-label reveal">Selected work</div>
+          <h2 className="band-label">Selected work</h2>
           <div className="band-body">
             <ol className="projects">
               {projects.map((p) => (
-                <li className="project reveal" key={p.title}>
+                <li className="project" key={p.title}>
                   <div className="project-head">
-                    <h2>{p.title}</h2>
+                    <h3>{p.title}</h3>
                     <span className="project-status">{p.status}</span>
                   </div>
                   <p>{p.body}</p>
@@ -120,11 +137,11 @@ export default function App() {
         </section>
 
         <section className="band" id="experience">
-          <div className="band-label reveal">Experience</div>
+          <h2 className="band-label">Experience</h2>
           <div className="band-body">
             <ol className="timeline">
               {experience.map((e) => (
-                <li className="reveal" key={e.period + e.role}>
+                <li key={e.period + e.role}>
                   <span className="period">{e.period}</span>
                   <div>
                     <h3>
@@ -140,11 +157,11 @@ export default function App() {
         </section>
 
         <section className="band" id="education">
-          <div className="band-label reveal">Education</div>
+          <h2 className="band-label">Education</h2>
           <div className="band-body">
             <ol className="timeline">
               {education.map((e) => (
-                <li className="reveal" key={e.title}>
+                <li key={e.title}>
                   <span className="period">{e.period}</span>
                   <div>
                     <h3>
@@ -159,10 +176,10 @@ export default function App() {
         </section>
 
         <section className="band" id="skills">
-          <div className="band-label reveal">Skills</div>
+          <h2 className="band-label">Skills</h2>
           <div className="band-body">
             {skills.map((g) => (
-              <div className="skill-group reveal" key={g.group}>
+              <div className="skill-group" key={g.group}>
                 <h3>{g.group}</h3>
                 <ul className="stack">
                   {g.items.map((s) => (
@@ -171,7 +188,7 @@ export default function App() {
                 </ul>
               </div>
             ))}
-            <div className="skill-group reveal">
+            <div className="skill-group">
               <h3>Languages</h3>
               <ul className="stack">
                 {languages.map((l) => (
@@ -185,12 +202,12 @@ export default function App() {
         </section>
 
         <footer className="band contact" id="contact">
-          <div className="band-label reveal">Contact</div>
-          <div className="band-body reveal">
+          <h2 className="band-label">Contact</h2>
+          <div className="band-body">
             <a className="mail" href={`mailto:${profile.links.email}`}>
               {profile.links.email}
             </a>
-            <nav className="hero-actions">
+            <nav className="hero-actions" aria-label="Contact links">
               <Magnetic href={profile.links.cv} download>
                 Download CV
               </Magnetic>

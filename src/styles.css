@@ -1,22 +1,31 @@
+/*
+  Cool grey ground, one signal colour, one typeface worked across its width axis.
+  The 3D scene is the only loud element; everything here stays quiet and
+  measured so it has room to be.
+*/
+
 :root {
-  --paper: #e5e4df;
-  --ink: #16181a;
-  --ink-soft: #5c605f;
-  --ink-faint: #8b8e8a;
-  --rule: #c9c8c1;
-  --accent: #37346b;
-  --mesh: #2b2e33;
+  --bg: #edeef0;
+  --ink: #14171c;
+  --ink-2: #545c68;
+  --rule: #c8ccd2;
+  --signal: #2f5ae0;
+
+  /* Read by the WebGL stage for point colour. */
+  --mesh: #2b3038;
+
+  --rail: 132px;
+  --measure: 68ch;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #131416;
-    --ink: #e8e7e2;
-    --ink-soft: #9a9d99;
-    --ink-faint: #6b6e6a;
-    --rule: #2c2e30;
-    --accent: #a9a5ee;
-    --mesh: #b8bcc4;
+    --bg: #0e1116;
+    --ink: #e6e9ed;
+    --ink-2: #99a1ad;
+    --rule: #262b33;
+    --signal: #6e92ff;
+    --mesh: #aab3c2;
   }
 }
 
@@ -30,11 +39,11 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
-  font-family: 'Archivo', system-ui, sans-serif;
+  font-family: 'Archivo', system-ui, -apple-system, sans-serif;
   font-size: 17px;
-  line-height: 1.62;
+  line-height: 1.6;
   font-variation-settings: 'wdth' 100;
   -webkit-font-smoothing: antialiased;
 }
@@ -44,60 +53,121 @@ a {
   text-decoration: none;
 }
 
+/* ---------------------------------------------------------------- scene ---
+   Right column on desktop, so text never sits on top of the canvas. That
+   keeps contrast honest in both themes without dropping the scene's opacity.  */
+
 .scene {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  width: 46vw;
+  height: 100vh;
   z-index: 0;
   pointer-events: none;
 }
 
-.scene-gl {
-  width: 100%;
-  height: 100%;
-}
-
+.scene-gl,
 .scene-gl canvas {
   display: block;
   width: 100% !important;
   height: 100% !important;
 }
 
+/* ----------------------------------------------------------------- rail ---
+   Fixed section index. Functional wayfinding on a long CV page, not
+   decoration: it tells you where you are and how much is left.               */
+
+.rail {
+  position: fixed;
+  top: 50%;
+  left: clamp(18px, 3vw, 40px);
+  transform: translateY(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.rail a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-variation-settings: 'wdth' 85;
+  color: var(--ink-2);
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+
+.rail a::before {
+  content: '';
+  width: 14px;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.2s;
+}
+
+.rail a:hover,
+.rail a:focus-visible {
+  opacity: 1;
+}
+
+.rail a[aria-current='true'] {
+  opacity: 1;
+  color: var(--ink);
+}
+
+.rail a[aria-current='true']::before {
+  width: 26px;
+}
+
+/* ---------------------------------------------------------------- shell --- */
+
 .shell {
   position: relative;
   z-index: 1;
-  max-width: 1080px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 5vw, 64px);
+  padding: 0 clamp(20px, 5vw, 56px) 0 calc(var(--rail) + clamp(20px, 4vw, 48px));
 }
 
+.col {
+  max-width: var(--measure);
+}
+
+/* ----------------------------------------------------------------- hero ---
+   Real DOM, painted before the scene chunk loads. No headline text ever
+   goes inside the canvas.                                                    */
+
 .hero {
-  min-height: 92vh;
+  min-height: 94vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 8vh 0 6vh;
+  padding: 10vh 0 7vh;
 }
 
 .hero-name {
-  font-size: clamp(44px, 9.5vw, 116px);
+  font-size: clamp(42px, 7.6vw, 104px);
   font-variation-settings: 'wdth' 118;
   font-weight: 500;
-  line-height: 0.94;
-  letter-spacing: -0.02em;
-  margin: 0 0 22px;
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  margin: 0 0 20px;
 }
 
 .word {
   display: inline-block;
   overflow: hidden;
   vertical-align: bottom;
-  padding-right: 0.22em;
+  padding-right: 0.2em;
 }
 
 .word-inner {
   display: inline-block;
   transform: translateY(105%);
-  transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.ready .word-inner {
@@ -105,36 +175,37 @@ body.ready .word-inner {
 }
 
 .hero-role {
-  font-size: clamp(17px, 2.2vw, 22px);
+  font-size: clamp(17px, 2vw, 21px);
   font-variation-settings: 'wdth' 88;
-  color: var(--ink);
-  margin: 0 0 26px;
+  margin: 0 0 24px;
 }
 
 .hero-intro {
-  max-width: 46ch;
-  color: var(--ink-soft);
-  margin: 0 0 38px;
+  max-width: 48ch;
+  color: var(--ink-2);
+  margin: 0 0 36px;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 26px;
+  gap: 12px 26px;
 }
 
 .hero-actions > a {
-  color: var(--accent);
+  color: var(--signal);
   border-bottom: 1px solid transparent;
   padding-bottom: 1px;
-  transition: border-color 0.25s;
+  transition: border-color 0.2s;
 }
 
 .hero-actions > a:hover,
 .hero-actions > a:focus-visible {
-  border-color: var(--accent);
+  border-color: var(--signal);
 }
+
+/* -------------------------------------------------------------- magnetic --- */
 
 .magnetic {
   display: inline-block;
@@ -142,37 +213,48 @@ body.ready .word-inner {
 
 .magnetic-hit {
   display: inline-block;
-  padding: 11px 26px;
+  padding: 10px 24px;
   border: 1px solid var(--ink);
-  border-radius: 999px;
   font-size: 15px;
   will-change: transform;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .magnetic-hit:hover,
 .magnetic-hit:focus-visible {
   background: var(--ink);
-  color: var(--paper);
+  color: var(--bg);
 }
+
+/* ---------------------------------------------------------------- bands --- */
 
 .band {
   display: grid;
-  grid-template-columns: 148px minmax(0, 1fr);
+  grid-template-columns: var(--rail) minmax(0, 1fr);
   gap: 0 40px;
-  padding: 62px 0;
+  padding: 72px 0;
   border-top: 1px solid var(--rule);
 }
 
+/* Real <h2>, deliberately small: it labels the band without shouting. */
 .band-label {
   font-size: 14px;
-  font-variation-settings: 'wdth' 84;
-  color: var(--ink-faint);
-  padding-top: 5px;
+  font-variation-settings: 'wdth' 85;
+  font-weight: 400;
+  color: var(--ink-2);
+  margin: 0;
+  padding-top: 6px;
 }
 
 .prose p {
-  max-width: 62ch;
+  max-width: var(--measure);
   margin: 0 0 1.1em;
+  color: var(--ink-2);
+}
+
+.prose p:first-child {
+  color: var(--ink);
+  font-size: 19px;
 }
 
 .projects,
@@ -182,9 +264,10 @@ body.ready .word-inner {
   padding: 0;
 }
 
+/* Rules, not cards. Nothing here gets a shadow or a rounded corner. */
 .project {
-  padding: 0 0 34px;
-  margin: 0 0 34px;
+  padding: 0 0 38px;
+  margin: 0 0 38px;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -198,56 +281,55 @@ body.ready .word-inner {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px 14px;
-  margin-bottom: 10px;
+  gap: 6px 16px;
+  margin-bottom: 12px;
 }
 
-.project h2 {
-  font-size: clamp(22px, 3vw, 29px);
-  font-variation-settings: 'wdth' 106;
+.project h3 {
+  font-size: clamp(21px, 2.6vw, 28px);
+  font-variation-settings: 'wdth' 110;
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
-.project-status {
-  font-size: 13px;
-  color: var(--ink-faint);
-  font-variation-settings: 'wdth' 84;
+.project-status,
+.period,
+.org,
+.lvl {
+  font-size: 13.5px;
+  font-variation-settings: 'wdth' 85;
+  color: var(--ink-2);
 }
 
 .project p {
-  max-width: 64ch;
-  color: var(--ink-soft);
-  margin: 0 0 16px;
+  max-width: var(--measure);
+  color: var(--ink-2);
+  margin: 0 0 18px;
 }
 
 .stack {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 6px 18px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .stack li {
-  font-size: 13px;
-  color: var(--ink-soft);
-  border: 1px solid var(--rule);
-  border-radius: 3px;
-  padding: 3px 9px;
+  font-size: 13.5px;
+  font-variation-settings: 'wdth' 85;
+  color: var(--ink-2);
 }
 
-.lvl {
-  color: var(--ink-faint);
-}
+/* -------------------------------------------------------------- timeline --- */
 
 .timeline li {
   display: grid;
-  grid-template-columns: 168px minmax(0, 1fr);
+  grid-template-columns: 160px minmax(0, 1fr);
   gap: 4px 24px;
-  padding: 0 0 26px;
+  padding: 0 0 28px;
 }
 
 .timeline li:last-child {
@@ -255,37 +337,34 @@ body.ready .word-inner {
 }
 
 .period {
-  font-size: 14px;
-  color: var(--ink-faint);
-  font-variation-settings: 'wdth' 84;
-  padding-top: 3px;
+  padding-top: 4px;
 }
 
 .timeline h3 {
   font-size: 18px;
   font-weight: 500;
-  margin: 0 0 3px;
+  margin: 0 0 4px;
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 12px;
+  gap: 2px 12px;
   align-items: baseline;
 }
 
 .org {
-  font-size: 14px;
   font-weight: 400;
-  color: var(--ink-faint);
 }
 
 .timeline p {
-  max-width: 62ch;
-  color: var(--ink-soft);
+  max-width: var(--measure);
+  color: var(--ink-2);
   margin: 0;
   font-size: 16px;
 }
 
+/* ---------------------------------------------------------------- skills --- */
+
 .skill-group {
-  margin-bottom: 26px;
+  margin-bottom: 28px;
 }
 
 .skill-group:last-child {
@@ -298,18 +377,21 @@ body.ready .word-inner {
   margin: 0 0 10px;
 }
 
+/* --------------------------------------------------------------- contact --- */
+
 .contact {
-  padding-bottom: 96px;
+  padding-bottom: 110px;
 }
 
 .mail {
   display: inline-block;
-  font-size: clamp(22px, 4vw, 38px);
-  font-variation-settings: 'wdth' 104;
+  font-size: clamp(21px, 3.4vw, 34px);
+  font-variation-settings: 'wdth' 106;
   font-weight: 500;
-  letter-spacing: -0.015em;
-  margin-bottom: 26px;
+  letter-spacing: -0.02em;
+  margin-bottom: 28px;
   border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s;
 }
 
 .mail:hover,
@@ -318,36 +400,78 @@ body.ready .word-inner {
 }
 
 .loc {
-  color: var(--ink-faint);
+  color: var(--ink-2);
   font-size: 14px;
-  margin: 26px 0 0;
+  font-variation-settings: 'wdth' 85;
+  margin: 28px 0 0;
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--signal);
   outline-offset: 3px;
 }
 
-@media (max-width: 720px) {
+/* ------------------------------------------------------------ responsive --- */
+
+@media (max-width: 1080px) {
+  .rail {
+    display: none;
+  }
+
+  .shell {
+    padding-left: clamp(20px, 5vw, 56px);
+  }
+
+  .band {
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 0 28px;
+  }
+}
+
+@media (max-width: 700px) {
+  body {
+    font-size: 16px;
+  }
+
+  /* Scene drops behind the hero only, and gets out of the way of the text. */
+  .scene {
+    width: 100vw;
+    height: 62vh;
+    opacity: 0.38;
+  }
+
   .band {
     grid-template-columns: 1fr;
-    gap: 14px;
-    padding: 46px 0;
+    gap: 12px;
+    padding: 52px 0;
   }
+
   .timeline li {
     grid-template-columns: 1fr;
     gap: 2px;
   }
-  .scene {
-    opacity: 0.4;
+
+  .timeline li .period {
+    padding-top: 0;
   }
 }
+
+/* -------------------------------------------------------- reduced motion --- */
 
 @media (prefers-reduced-motion: reduce) {
   .word-inner {
     transform: none;
     transition: none;
   }
+
+  .rail a,
+  .rail a::before,
+  .magnetic-hit,
+  .mail,
+  .hero-actions > a {
+    transition: none;
+  }
+
   * {
     scroll-behavior: auto !important;
   }
