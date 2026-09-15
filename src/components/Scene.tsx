@@ -2,6 +2,7 @@ import {
   Component,
   lazy,
   Suspense,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -50,6 +51,9 @@ export default function Scene() {
   const [armed, setArmed] = useState(false)
   const [visible, setVisible] = useState(false)
 
+  // Stable identity: Stage tears the whole renderer down when this changes.
+  const kill = useCallback(() => setDead(true), [])
+
   useEffect(() => {
     const el = host.current
     if (!el) return
@@ -72,15 +76,9 @@ export default function Scene() {
 
   return (
     <div className="scene" ref={host} aria-hidden="true">
-      <SceneBoundary onError={() => setDead(true)}>
+      <SceneBoundary onError={kill}>
         <Suspense fallback={null}>
-          {armed && (
-            <Stage
-              reduced={reduced}
-              visible={visible}
-              onContextLost={() => setDead(true)}
-            />
-          )}
+          {armed && <Stage reduced={reduced} visible={visible} onContextLost={kill} />}
         </Suspense>
       </SceneBoundary>
     </div>
