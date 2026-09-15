@@ -51,6 +51,12 @@ export default function Scene() {
   const [armed, setArmed] = useState(false)
   const [visible, setVisible] = useState(false)
 
+  // The scene is client-only. Rendering null on the server *and* on the first
+  // client render keeps hydration matching; the canvas appears on the pass
+  // after mount.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   // Stable identity: Stage tears the whole renderer down when this changes.
   const kill = useCallback(() => setDead(true), [])
 
@@ -72,7 +78,7 @@ export default function Scene() {
 
   // No WebGL, or the context died: the page keeps its full styled layout and
   // simply has no scene in it. Never a blank screen.
-  if (!supported || dead) return null
+  if (!mounted || !supported || dead) return null
 
   return (
     <div className="scene" ref={host} aria-hidden="true">

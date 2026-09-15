@@ -13,6 +13,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600&display=swap" rel="stylesheet" />
   </head>
   <body>
+    <script>
+      // Marks that scripting is available. The name's reveal animation starts
+      // from a clipped, off-screen state, so that state must only ever exist
+      // when there is JavaScript around to finish it. Without this the
+      // prerendered heading would stay invisible.
+      document.documentElement.classList.add('js')
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

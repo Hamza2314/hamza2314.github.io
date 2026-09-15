@@ -166,10 +166,16 @@ a {
 
 .word-inner {
   display: inline-block;
+}
+
+/* The hidden starting state exists only when scripting can undo it. With JS
+   off, the name is simply there. */
+.js .word-inner {
   transform: translateY(105%);
   transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.js body.ready .word-inner,
 body.ready .word-inner {
   transform: translateY(0);
 }
@@ -459,7 +465,8 @@ body.ready .word-inner {
 /* -------------------------------------------------------- reduced motion --- */
 
 @media (prefers-reduced-motion: reduce) {
-  .word-inner {
+  .word-inner,
+  .js .word-inner {
     transform: none;
     transition: none;
   }
