@@ -8,6 +8,29 @@
     <meta property="og:title" content="Hamza Masri — AI Engineer and DevOps Specialist" />
     <meta property="og:description" content="Production AI systems and the Kubernetes infrastructure that runs them." />
     <meta property="og:type" content="website" />
+    <!--
+      The portrait is the LCP element, so it is fetched at the highest priority
+      and never lazy-loaded. Only the AVIF set is preloaded: preloading both
+      formats would make AVIF-capable browsers download the image twice, and
+      anything without AVIF support skips this on the type and picks up the
+      WebP from <picture> as normal.
+    -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      media="(min-width: 769px)"
+      imagesrcset="/hero-420.avif 420w, /hero-570.avif 570w"
+      imagesizes="38vw"
+    />
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      media="(max-width: 768px)"
+      imagesrcset="/hero-t-420.avif 420w, /hero-t-550.avif 550w"
+      imagesizes="76vw"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600&display=swap" rel="stylesheet" />

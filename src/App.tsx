@@ -17,15 +17,28 @@ const SECTIONS = [
   { id: 'contact', label: 'Contact' },
 ]
 
-/** The one deliberate entrance on the page: the name rises once, on load. */
+/**
+ * Two crops of the same portrait: `hero` runs to the waistcoat for the
+ * side-by-side desktop layout, `hero-t` is head and shoulders for the stacked
+ * phone one. Cropping tighter in CSS instead would mean upscaling.
+ */
+const WIDE_WIDTHS = [420, 570]
+const TIGHT_WIDTHS = [420, 550]
+
+const PHONE = '(max-width: 768px)'
+const WIDE_SIZES = '38vw'
+const TIGHT_SIZES = '76vw'
+
+const srcSet = (name: string, widths: number[], ext: string) =>
+  widths.map((w) => `/${name}-${w}.${ext} ${w}w`).join(', ')
+
+/** Words rise from a clipped mask. The stagger is driven by GSAP, not CSS. */
 function SplitHeading({ text, className }: { text: string; className?: string }) {
   return (
     <h1 className={className}>
       {text.split(' ').map((word, i) => (
         <span className="word" key={i}>
-          <span className="word-inner" style={{ transitionDelay: `${i * 70}ms` }}>
-            {word}
-          </span>
+          <span className="word-inner">{word}</span>
         </span>
       ))}
     </h1>
@@ -34,17 +47,46 @@ function SplitHeading({ text, className }: { text: string; className?: string })
 
 export default function App() {
   const root = useRef<HTMLDivElement>(null)
+  const hero = useRef<HTMLElement>(null)
+  const figure = useRef<HTMLDivElement>(null)
+  const glow = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState<string>('')
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const coarse = window.matchMedia('(max-width: 768px)').matches
     let lenis: Lenis | null = null
     let raf = 0
+
+    // Damped cursor drift for the hero glow. Targets are written by the
+    // pointer handler; the loop eases toward them so the light never snaps.
+    let gx = 0
+    let gy = 0
+    let tgx = 0
+    let tgy = 0
+
+    const onPointer = (e: PointerEvent) => {
+      tgx = (e.clientX / window.innerWidth - 0.5) * 2
+      tgy = (e.clientY / window.innerHeight - 0.5) * 2
+    }
+
+    // No cursor on a phone, and reduced motion means the light holds still.
+    const drifts = !reduced && !coarse
+    if (drifts) window.addEventListener('pointermove', onPointer, { passive: true })
 
     if (!reduced) {
       lenis = new Lenis({ duration: 1.05, smoothWheel: true })
       const loop = (time: number) => {
         lenis?.raf(time)
+
+        if (drifts && glow.current) {
+          gx += (tgx - gx) * 0.06
+          gy += (tgy - gy) * 0.06
+          // About 4% of the viewport of travel, either way.
+          glow.current.style.setProperty('--gx', `${(gx * 4).toFixed(3)}vw`)
+          glow.current.style.setProperty('--gy', `${(gy * 4).toFixed(3)}vh`)
+        }
+
         raf = requestAnimationFrame(loop)
       }
       raf = requestAnimationFrame(loop)
@@ -52,7 +94,58 @@ export default function App() {
     }
 
     const ctx = gsap.context(() => {
-      document.body.classList.add('ready')
+      if (!reduced) {
+        // One orchestrated moment. The subject arrives first, the name
+        // overlaps it, and the supporting copy follows as a single group.
+        gsap
+          .timeline({ defaults: { ease: 'power3.out' } })
+          .fromTo(
+            '.hero-photo',
+            { opacity: 0, y: 26 },
+            { opacity: 1, y: 0, duration: 0.9 },
+            0,
+          )
+          // y:0 is load-bearing. The anti-flash CSS start state is a
+          // translateY(105%), which GSAP parses into its pixel y channel on
+          // first touch; animating yPercent alone then leaves those pixels in
+          // place and the words finish exactly where they started, clipped by
+          // .word's overflow. Pinning y keeps the percentage the only mover.
+          .fromTo(
+            '.hero-name .word-inner',
+            { yPercent: 105, y: 0 },
+            { yPercent: 0, y: 0, duration: 0.9, stagger: 0.07 },
+            0.18,
+          )
+          .fromTo(
+            '.hero-reveal',
+            { opacity: 0, y: 14 },
+            { opacity: 1, y: 0, duration: 0.7, stagger: 0.09 },
+            0.5,
+          )
+
+        // Scroll. One value drives all of it, scrubbed, never pinned.
+        const range = { trigger: hero.current, start: 'top top', end: 'bottom top' }
+
+        gsap.to(figure.current, {
+          // Half the page's own speed, so the subject lags behind the copy.
+          y: () => window.innerHeight * 0.5,
+          scale: 1.05,
+          ease: 'none',
+          scrollTrigger: { ...range, scrub: true, invalidateOnRefresh: true },
+        })
+
+        gsap.to('.hero-text', {
+          opacity: 0,
+          ease: 'none',
+          scrollTrigger: { ...range, start: '60% top', scrub: true },
+        })
+
+        gsap.to(glow.current, {
+          opacity: 0,
+          ease: 'none',
+          scrollTrigger: { ...range, scrub: true },
+        })
+      }
 
       // ScrollTrigger drives the rail's current-section state. It is
       // wayfinding, not decoration, which is why it survives reduced motion
@@ -75,6 +168,7 @@ export default function App() {
     return () => {
       ctx.revert()
       cancelAnimationFrame(raf)
+      window.removeEventListener('pointermove', onPointer)
       lenis?.destroy()
     }
   }, [])
@@ -91,20 +185,59 @@ export default function App() {
         ))}
       </nav>
 
-      <div className="shell">
-        <header className="hero" id="top">
+      <header className="hero" id="top" ref={hero}>
+        <div className="hero-glow" ref={glow} aria-hidden="true" />
+
+        <div className="hero-figure" ref={figure}>
+          <picture className="hero-photo">
+            <source
+              media={PHONE}
+              type="image/avif"
+              srcSet={srcSet('hero-t', TIGHT_WIDTHS, 'avif')}
+              sizes={TIGHT_SIZES}
+            />
+            <source
+              media={PHONE}
+              type="image/webp"
+              srcSet={srcSet('hero-t', TIGHT_WIDTHS, 'webp')}
+              sizes={TIGHT_SIZES}
+            />
+            <source
+              type="image/avif"
+              srcSet={srcSet('hero', WIDE_WIDTHS, 'avif')}
+              sizes={WIDE_SIZES}
+            />
+            <source
+              type="image/webp"
+              srcSet={srcSet('hero', WIDE_WIDTHS, 'webp')}
+              sizes={WIDE_SIZES}
+            />
+            <img
+              src="/hero-570.webp"
+              alt={`${profile.name}, ${profile.role}, in a light grey three-piece suit`}
+              width={570}
+              height={1000}
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
+        </div>
+
+        <div className="hero-text">
           <SplitHeading text={profile.name} className="hero-name" />
-          <p className="hero-role">{profile.role}</p>
-          <p className="hero-intro">{profile.intro}</p>
-          <nav className="hero-actions" aria-label="Primary">
+          <p className="hero-role hero-reveal">{profile.role}</p>
+          <p className="hero-intro hero-reveal">{profile.intro}</p>
+          <nav className="hero-actions hero-reveal" aria-label="Primary">
             <Magnetic href={profile.links.cv} download>
               Download CV
             </Magnetic>
             <a href={profile.links.github}>GitHub</a>
             <a href={profile.links.linkedin}>LinkedIn</a>
           </nav>
-        </header>
+        </div>
+      </header>
 
+      <div className="shell">
         <section className="band" id="about">
           <h2 className="band-label">About</h2>
           <div className="band-body prose">
