@@ -1,10 +1,20 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import Scene from './components/Scene'
 import Magnetic from './components/Magnetic'
+import {
+  getServerTuning,
+  getTuning,
+  hydrateTuning,
+  subscribe as subscribeTuning,
+} from './lib/heroTuning'
 import { profile, projects, experience, education, skills, languages } from './data'
+
+// Design panel. Its own chunk, and only ever requested with ?tune in the URL,
+// so it costs an ordinary visitor nothing.
+const HeroTuner = lazy(() => import('./components/HeroTuner'))
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -22,8 +32,8 @@ const SECTIONS = [
  * side-by-side desktop layout, `hero-t` is head and shoulders for the stacked
  * phone one. Cropping tighter in CSS instead would mean upscaling.
  */
-const WIDE_WIDTHS = [420, 570]
-const TIGHT_WIDTHS = [420, 550]
+const WIDE_WIDTHS = [405]
+const TIGHT_WIDTHS = [375]
 
 const PHONE = '(max-width: 768px)'
 const WIDE_SIZES = '38vw'
@@ -51,6 +61,20 @@ export default function App() {
   const figure = useRef<HTMLDivElement>(null)
   const glow = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState<string>('')
+
+  // Stored tuning is applied after mount, never during render, so the
+  // prerendered markup and the first client render always agree.
+  const tuning = useSyncExternalStore(subscribeTuning, getTuning, getServerTuning)
+  const [tunerOn, setTunerOn] = useState(false)
+
+  useEffect(() => {
+    hydrateTuning()
+    setTunerOn(new URLSearchParams(window.location.search).has('tune'))
+  }, [])
+
+  const heroName = tuning.name.trim() || profile.name
+  const heroRole = tuning.role.trim() || profile.role
+  const heroIntro = tuning.intro.trim() || profile.intro
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -82,9 +106,10 @@ export default function App() {
         if (drifts && glow.current) {
           gx += (tgx - gx) * 0.06
           gy += (tgy - gy) * 0.06
-          // About 4% of the viewport of travel, either way.
-          glow.current.style.setProperty('--gx', `${(gx * 4).toFixed(3)}vw`)
-          glow.current.style.setProperty('--gy', `${(gy * 4).toFixed(3)}vh`)
+          // Travel is a share of the viewport, tunable, default 4%.
+          const reach = getTuning().glowDrift
+          glow.current.style.setProperty('--gx', `${(gx * reach).toFixed(3)}vw`)
+          glow.current.style.setProperty('--gy', `${(gy * reach).toFixed(3)}vh`)
         }
 
         raf = requestAnimationFrame(loop)
@@ -94,7 +119,7 @@ export default function App() {
     }
 
     const ctx = gsap.context(() => {
-      if (!reduced) {
+      if (!reduced && getTuning().entrance) {
         // One orchestrated moment. The subject arrives first, the name
         // overlaps it, and the supporting copy follows as a single group.
         gsap
@@ -122,13 +147,21 @@ export default function App() {
             { opacity: 1, y: 0, duration: 0.7, stagger: 0.09 },
             0.5,
           )
+      } else if (!reduced) {
+        // Entrance switched off in the panel: land everything at its end state
+        // so the CSS start states do not leave the hero half-hidden.
+        gsap.set('.hero-photo', { opacity: 1, y: 0 })
+        gsap.set('.hero-name .word-inner', { yPercent: 0, y: 0 })
+        gsap.set('.hero-reveal', { opacity: 1, y: 0 })
+      }
 
+      if (!reduced) {
         // Scroll. One value drives all of it, scrubbed, never pinned.
         const range = { trigger: hero.current, start: 'top top', end: 'bottom top' }
 
         gsap.to(figure.current, {
-          // Half the page's own speed, so the subject lags behind the copy.
-          y: () => window.innerHeight * 0.5,
+          // Read live so the panel's parallax slider takes effect on refresh.
+          y: () => window.innerHeight * getTuning().parallax,
           scale: 1.05,
           ease: 'none',
           scrollTrigger: { ...range, scrub: true, invalidateOnRefresh: true },
@@ -177,6 +210,12 @@ export default function App() {
     <div ref={root}>
       <Scene />
 
+      {tunerOn && (
+        <Suspense fallback={null}>
+          <HeroTuner />
+        </Suspense>
+      )}
+
       <nav className="rail" aria-label="Sections">
         {SECTIONS.map((s) => (
           <a key={s.id} href={`#${s.id}`} aria-current={active === s.id ? 'true' : undefined}>
@@ -213,10 +252,10 @@ export default function App() {
               sizes={WIDE_SIZES}
             />
             <img
-              src="/hero-570.webp"
-              alt={`${profile.name}, ${profile.role}, in a light grey three-piece suit`}
-              width={570}
-              height={1000}
+              src="/hero-405.webp"
+              alt={`${heroName}, ${heroRole}, in a light grey three-piece suit`}
+              width={405}
+              height={625}
               decoding="async"
               fetchPriority="high"
             />
@@ -224,9 +263,9 @@ export default function App() {
         </div>
 
         <div className="hero-text">
-          <SplitHeading text={profile.name} className="hero-name" />
-          <p className="hero-role hero-reveal">{profile.role}</p>
-          <p className="hero-intro hero-reveal">{profile.intro}</p>
+          <SplitHeading text={heroName} className="hero-name" />
+          <p className="hero-role hero-reveal">{heroRole}</p>
+          <p className="hero-intro hero-reveal">{heroIntro}</p>
           <nav className="hero-actions hero-reveal" aria-label="Primary">
             <Magnetic href={profile.links.cv} download>
               Download CV

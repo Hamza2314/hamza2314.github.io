@@ -141,15 +141,19 @@ a {
    Opaque ground, deliberately: the WebGL canvas is position:fixed and would
    otherwise paint through the first viewport.                                */
 
+/* Every value below is a var with the shipped default as its fallback, so the
+   tuning panel can drive the whole section without any of it depending on the
+   panel being present. */
+
 .hero {
   position: relative;
   z-index: 2;
   overflow: hidden;
   min-height: 600px;
-  height: 100vh;
+  height: var(--h-height, 100vh);
   background: var(--bg);
   display: grid;
-  grid-template-columns: 38% minmax(0, 1fr);
+  grid-template-columns: var(--h-split, 38%) minmax(0, 1fr);
   align-items: center;
 }
 
@@ -163,9 +167,11 @@ a {
   z-index: 1;
   pointer-events: none;
   background: radial-gradient(
-    58% 52% at calc(75% + var(--gx, 0vw)) calc(85% + var(--gy, 0vh)),
-    rgba(200, 205, 212, 0.11),
-    rgba(200, 205, 212, 0.05) 42%,
+    var(--h-glow-rx, 58%) var(--h-glow-ry, 52%) at
+      calc(var(--h-glow-x, 75%) + var(--gx, 0vw))
+      calc(var(--h-glow-y, 85%) + var(--gy, 0vh)),
+    rgba(200, 205, 212, var(--h-glow-a, 0.11)),
+    rgba(200, 205, 212, calc(var(--h-glow-a, 0.11) * 0.45)) 42%,
     rgba(200, 205, 212, 0) 72%
   );
 }
@@ -177,10 +183,11 @@ a {
 .hero-figure {
   position: absolute;
   z-index: 2;
-  left: clamp(0px, 2vw, 40px);
-  bottom: -7vh;
-  width: 38%;
-  height: 82vh;
+  left: var(--h-fig-x, 2vw);
+  bottom: var(--h-fig-y, -7vh);
+  width: var(--h-fig-w, 38%);
+  height: var(--h-fig-h, 82vh);
+  opacity: var(--h-fig-opacity, 1);
   overflow: hidden;
   transform-origin: 50% 100%;
   will-change: transform;
@@ -196,7 +203,9 @@ a {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top center;
+  object-position: var(--h-fig-pos-x, 50%) var(--h-fig-pos-y, 0%);
+  transform: scale(var(--h-fig-scale, 1));
+  transform-origin: var(--h-fig-pos-x, 50%) var(--h-fig-pos-y, 0%);
 }
 
 /* --- copy --- */
@@ -205,21 +214,22 @@ a {
   position: relative;
   z-index: 3;
   grid-column: 2;
-  max-width: 52ch;
+  max-width: var(--h-text-w, 52ch);
   padding-right: clamp(20px, 5vw, 56px);
+  translate: var(--h-text-x, 0px) var(--h-text-y, 0px);
 }
 
 .hero-name {
-  font-size: clamp(40px, 5.6vw, 84px);
-  font-variation-settings: 'wdth' 118;
-  font-weight: 500;
-  line-height: 0.95;
-  letter-spacing: -0.025em;
+  font-size: var(--h-name-size, clamp(40px, 5.6vw, 84px));
+  font-variation-settings: 'wdth' var(--h-name-wdth, 118);
+  font-weight: var(--h-name-weight, 500);
+  line-height: var(--h-name-lh, 0.95);
+  letter-spacing: var(--h-name-track, -0.025em);
   margin: 0 0 22px;
   color: var(--text);
   /* Both words on one line: the name is the anchor, and wrapping it to two
      lines buries the surname under the given name. */
-  white-space: nowrap;
+  white-space: var(--h-name-wrap, nowrap);
 }
 
 .word {
@@ -249,14 +259,16 @@ a {
 }
 
 .hero-role {
-  font-size: clamp(17px, 2vw, 21px);
-  font-variation-settings: 'wdth' 88;
+  font-size: var(--h-role-size, clamp(17px, 2vw, 21px));
+  font-variation-settings: 'wdth' var(--h-role-wdth, 88);
   margin: 0 0 24px;
   color: var(--text);
 }
 
 .hero-intro {
-  max-width: 42ch;
+  font-size: var(--h-intro-size, inherit);
+  line-height: var(--h-intro-lh, 1.6);
+  max-width: var(--h-intro-measure, 42ch);
   color: var(--text-dim);
   margin: 0 0 36px;
 }
@@ -590,6 +602,183 @@ a {
   .timeline li .period {
     padding-top: 0;
   }
+}
+
+/* ---------------------------------------------------------------- tuner ---
+   Design tool, not part of the site. Only mounted with ?tune in the URL, and
+   deliberately styled with its own fixed values so that tuning the page's
+   tokens never changes the panel itself.                                     */
+
+.tuner {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9999;
+  width: 318px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #16181c;
+  border-left: 1px solid #2c3037;
+  color: #e8eaed;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  box-shadow: -18px 0 40px rgba(0, 0, 0, 0.45);
+}
+
+.tuner-fab {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 9999;
+  padding: 7px 14px;
+  background: #16181c;
+  border: 1px solid #2c3037;
+  border-radius: 4px;
+  color: #e8eaed;
+  font: 12px system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.tuner-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 12px;
+  border-bottom: 1px solid #2c3037;
+  flex: none;
+}
+
+.tuner-head strong {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.tuner-head-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.tuner button {
+  background: #22262c;
+  border: 1px solid #343941;
+  border-radius: 3px;
+  color: #e8eaed;
+  font: 11px system-ui, sans-serif;
+  padding: 4px 9px;
+  cursor: pointer;
+}
+
+.tuner button:hover {
+  background: #2c313a;
+}
+
+.tuner-body {
+  overflow-y: auto;
+  padding: 4px 0 40px;
+  flex: 1;
+}
+
+.tuner-group {
+  border-bottom: 1px solid #23272d;
+}
+
+.tuner-group-head {
+  width: 100%;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 9px 12px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9aa0a8 !important;
+}
+
+.tuner-controls {
+  padding: 2px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.tuner-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tuner-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #b8bec6;
+}
+
+.tuner-label em {
+  font-style: normal;
+  color: #7e858e;
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner input[type='range'] {
+  width: 100%;
+  accent-color: #6e92ff;
+  height: 16px;
+}
+
+.tuner input[type='text'],
+.tuner textarea {
+  width: 100%;
+  background: #0f1114;
+  border: 1px solid #2c3037;
+  border-radius: 3px;
+  color: #e8eaed;
+  font: 12px system-ui, sans-serif;
+  padding: 5px 7px;
+  resize: vertical;
+}
+
+.tuner input[type='color'] {
+  width: 100%;
+  height: 26px;
+  background: none;
+  border: 1px solid #2c3037;
+  border-radius: 3px;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.tuner-toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  color: #b8bec6;
+}
+
+.tuner-toggle input {
+  accent-color: #6e92ff;
+}
+
+.tuner-note {
+  margin: 0;
+  padding: 12px;
+  color: #878d95;
+  line-height: 1.5;
+}
+
+.tuner-note code {
+  color: #b8bec6;
+}
+
+.tuner-export {
+  width: calc(100% - 24px);
+  margin: 0 12px 12px;
+  font-family: ui-monospace, monospace !important;
+  font-size: 11px !important;
 }
 
 /* -------------------------------------------------------- reduced motion --- */

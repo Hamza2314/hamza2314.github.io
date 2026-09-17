@@ -10,7 +10,7 @@
 import { mkdirSync, statSync } from 'node:fs'
 import sharp from 'sharp'
 
-const SRC = 'assets/PersonalPhoto2-clean.png'
+const SRC = 'assets/Photo3.png'
 const OUT = 'public'
 
 /**
@@ -25,22 +25,23 @@ const OUT = 'public'
  */
 /**
  * Explicit crop boxes, measured from the cutout's alpha profile rather than
- * taken as a percentage of the frame. This photo has the subject centred with
- * headroom, so a fixed "top N%" rule would not land on the body.
+ * taken as a percentage of the frame: this source is a wide landscape plate
+ * with the subject in the left third, so no percentage rule would land.
  *
- * The right edge is deliberately 990, not the alpha bbox: automatic
- * segmentation merged a chair back into the left arm between columns 1000 and
- * 1110, and the two are one connected region, so the only way to drop the
- * furniture without hand-masking is to frame it out.
+ * Alpha profile of Photo3.png:
+ *   bbox          x 245..629, y 103..1164  (subject is only 385 x 1062)
+ *   head top      y 103
+ *   shoulders     y 368
+ *   widest        y 527
+ *   waistcoat pt  y ~700
  *
- *   head top      y 311
- *   shoulders     y 720
- *   widest        y 900
- *   waistcoat pt  y ~1330
+ * Note the ceiling this imposes: at 385px across, the widest derivative is
+ * smaller than the figure's own layout box on a 1440 viewport, so the hero
+ * upscales. Nothing here can recover detail the source does not have.
  */
 const CROPS = [
-  { name: 'hero', box: { left: 420, top: 300, width: 570, height: 1000 }, widths: [420, 570] },
-  { name: 'hero-t', box: { left: 430, top: 300, width: 550, height: 700 }, widths: [420, 550] },
+  { name: 'hero', box: { left: 235, top: 88, width: 405, height: 625 }, widths: [405] },
+  { name: 'hero-t', box: { left: 250, top: 88, width: 375, height: 362 }, widths: [375] },
 ]
 
 const meta = await sharp(SRC).metadata()
