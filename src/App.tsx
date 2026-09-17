@@ -32,8 +32,8 @@ const SECTIONS = [
  * side-by-side desktop layout, `hero-t` is head and shoulders for the stacked
  * phone one. Cropping tighter in CSS instead would mean upscaling.
  */
-const WIDE_WIDTHS = [405]
-const TIGHT_WIDTHS = [375]
+const WIDE_WIDTHS = [440, 800, 1350]
+const TIGHT_WIDTHS = [420, 800, 1220]
 
 const PHONE = '(max-width: 768px)'
 const WIDE_SIZES = '38vw'
@@ -252,10 +252,10 @@ export default function App() {
               sizes={WIDE_SIZES}
             />
             <img
-              src="/hero-405.webp"
+              src="/hero-800.webp"
               alt={`${heroName}, ${heroRole}, in a light grey three-piece suit`}
-              width={405}
-              height={625}
+              width={1350}
+              height={2150}
               decoding="async"
               fetchPriority="high"
             />

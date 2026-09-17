@@ -10,7 +10,7 @@
 import { mkdirSync, statSync } from 'node:fs'
 import sharp from 'sharp'
 
-const SRC = 'assets/Photo3.png'
+const SRC = 'assets/Photo4.png'
 const OUT = 'public'
 
 /**
@@ -25,23 +25,22 @@ const OUT = 'public'
  */
 /**
  * Explicit crop boxes, measured from the cutout's alpha profile rather than
- * taken as a percentage of the frame: this source is a wide landscape plate
- * with the subject in the left third, so no percentage rule would land.
+ * taken as a percentage of the frame.
  *
- * Alpha profile of Photo3.png:
- *   bbox          x 245..629, y 103..1164  (subject is only 385 x 1062)
- *   head top      y 103
- *   shoulders     y 368
- *   widest        y 527
- *   waistcoat pt  y ~700
+ * Alpha profile of Photo4.png (3375 x 4219):
+ *   bbox          x 929..2225, y 642..4218  (subject 1297 x 3577)
+ *   head top      y 642, head ~430px wide
+ *   shoulders     y ~1500
+ *   widest        y 2072  (x 972..2215)
+ *   waist         y ~2800, where the silhouette drops from 1123 to 822
  *
- * Note the ceiling this imposes: at 385px across, the widest derivative is
- * smaller than the figure's own layout box on a 1440 viewport, so the hero
- * upscales. Nothing here can recover detail the source does not have.
+ * This source finally clears the resolution the hero asks for: the figure
+ * occupies 38vw, so a 1920 viewport at 2x wants about 1460 device px, and the
+ * wide crop supplies 1350. No meaningful upscaling.
  */
 const CROPS = [
-  { name: 'hero', box: { left: 235, top: 88, width: 405, height: 625 }, widths: [405] },
-  { name: 'hero-t', box: { left: 250, top: 88, width: 375, height: 362 }, widths: [375] },
+  { name: 'hero', box: { left: 920, top: 600, width: 1350, height: 2150 }, widths: [440, 800, 1350] },
+  { name: 'hero-t', box: { left: 990, top: 600, width: 1220, height: 1300 }, widths: [420, 800, 1220] },
 ]
 
 const meta = await sharp(SRC).metadata()
