@@ -4,6 +4,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import Scene from './components/Scene'
 import Magnetic from './components/Magnetic'
+import DotField from './components/DotField'
+import ScratchPortrait from './components/ScratchPortrait'
 import {
   getServerTuning,
   getTuning,
@@ -26,21 +28,6 @@ const SECTIONS = [
   { id: 'skills', label: 'Skills' },
   { id: 'contact', label: 'Contact' },
 ]
-
-/**
- * Two crops of the same portrait: `hero` runs to the waistcoat for the
- * side-by-side desktop layout, `hero-t` is head and shoulders for the stacked
- * phone one. Cropping tighter in CSS instead would mean upscaling.
- */
-const WIDE_WIDTHS = [440, 800, 1350]
-const TIGHT_WIDTHS = [420, 800, 1220]
-
-const PHONE = '(max-width: 768px)'
-const WIDE_SIZES = '38vw'
-const TIGHT_SIZES = '76vw'
-
-const srcSet = (name: string, widths: number[], ext: string) =>
-  widths.map((w) => `/${name}-${w}.${ext} ${w}w`).join(', ')
 
 /** Words rise from a clipped mask. The stagger is driven by GSAP, not CSS. */
 function SplitHeading({ text, className }: { text: string; className?: string }) {
@@ -225,54 +212,26 @@ export default function App() {
       </nav>
 
       <header className="hero" id="top" ref={hero}>
+        <DotField />
         <div className="hero-glow" ref={glow} aria-hidden="true" />
 
-        <div className="hero-figure" ref={figure}>
-          <picture className="hero-photo">
-            <source
-              media={PHONE}
-              type="image/avif"
-              srcSet={srcSet('hero-t', TIGHT_WIDTHS, 'avif')}
-              sizes={TIGHT_SIZES}
-            />
-            <source
-              media={PHONE}
-              type="image/webp"
-              srcSet={srcSet('hero-t', TIGHT_WIDTHS, 'webp')}
-              sizes={TIGHT_SIZES}
-            />
-            <source
-              type="image/avif"
-              srcSet={srcSet('hero', WIDE_WIDTHS, 'avif')}
-              sizes={WIDE_SIZES}
-            />
-            <source
-              type="image/webp"
-              srcSet={srcSet('hero', WIDE_WIDTHS, 'webp')}
-              sizes={WIDE_SIZES}
-            />
-            <img
-              src="/hero-800.webp"
-              alt={`${heroName}, ${heroRole}, in a light grey three-piece suit`}
-              width={1350}
-              height={2150}
-              decoding="async"
-              fetchPriority="high"
-            />
-          </picture>
-        </div>
+        <div className="hero-inner">
+          <div className="hero-figure" ref={figure}>
+            <ScratchPortrait alt={`${heroName}, ${heroRole}`} />
+          </div>
 
-        <div className="hero-text">
-          <SplitHeading text={heroName} className="hero-name" />
-          <p className="hero-role hero-reveal">{heroRole}</p>
-          <p className="hero-intro hero-reveal">{heroIntro}</p>
-          <nav className="hero-actions hero-reveal" aria-label="Primary">
-            <Magnetic href={profile.links.cv} download>
-              Download CV
-            </Magnetic>
-            <a href={profile.links.github}>GitHub</a>
-            <a href={profile.links.linkedin}>LinkedIn</a>
-          </nav>
+          <div className="hero-text">
+            <SplitHeading text={heroName} className="hero-name" />
+            <p className="hero-role hero-reveal">{heroRole}</p>
+            <p className="hero-intro hero-reveal">{heroIntro}</p>
+            <nav className="hero-actions hero-reveal" aria-label="Primary">
+              <Magnetic href={profile.links.cv} download>
+                Download CV
+              </Magnetic>
+              <a href={profile.links.github}>GitHub</a>
+              <a href={profile.links.linkedin}>LinkedIn</a>
+            </nav>
+          </div>
         </div>
       </header>
 

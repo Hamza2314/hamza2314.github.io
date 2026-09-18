@@ -14,22 +14,18 @@
       formats would make AVIF-capable browsers download the image twice, and
       anything without AVIF support skips this on the type and picks up the
       WebP from <picture> as normal.
+
+      One link rather than the pair the full-length portrait needed, because the
+      circle is a single square crop at every width. The sizes list has to match
+      ScratchPortrait's SIZES exactly: a mismatch has the preload scanner fetch
+      one derivative and the parser then ask for a different one.
     -->
     <link
       rel="preload"
       as="image"
       type="image/avif"
-      media="(min-width: 769px)"
-      imagesrcset="/hero-440.avif 440w, /hero-800.avif 800w, /hero-1350.avif 1350w"
-      imagesizes="38vw"
-    />
-    <link
-      rel="preload"
-      as="image"
-      type="image/avif"
-      media="(max-width: 768px)"
-      imagesrcset="/hero-t-420.avif 420w, /hero-t-800.avif 800w, /hero-t-1220.avif 1220w"
-      imagesizes="76vw"
+      imagesrcset="/circle-1-200.avif 200w, /circle-1-400.avif 400w, /circle-1-600.avif 600w"
+      imagesizes="(max-width: 768px) 150px, 200px"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

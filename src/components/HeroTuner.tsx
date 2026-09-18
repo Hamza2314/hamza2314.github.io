@@ -2,6 +2,7 @@ import { useState, useSyncExternalStore } from 'react'
 import {
   DEFAULTS,
   exportCss,
+  exportDefaults,
   getServerTuning,
   getTuning,
   resetTuning,
@@ -69,23 +70,29 @@ const GROUPS: Group[] = [
     title: 'Layout',
     controls: [
       { kind: 'range', key: 'heroHeight', label: 'Hero height', min: 60, max: 120, step: 1, unit: 'vh' },
-      { kind: 'range', key: 'splitLeft', label: 'Left column', min: 15, max: 65, step: 1, unit: '%' },
       { kind: 'range', key: 'textWidth', label: 'Text measure', min: 24, max: 80, step: 1, unit: 'ch' },
       { kind: 'range', key: 'textShiftX', label: 'Text nudge X', min: -300, max: 300, step: 2, unit: 'px' },
       { kind: 'range', key: 'textShiftY', label: 'Text nudge Y', min: -300, max: 300, step: 2, unit: 'px' },
     ],
   },
   {
-    title: 'Photo',
+    title: 'Dot field',
     controls: [
-      { kind: 'range', key: 'figWidth', label: 'Width', min: 15, max: 70, step: 1, unit: '%' },
-      { kind: 'range', key: 'figHeight', label: 'Height', min: 40, max: 120, step: 1, unit: 'vh' },
-      { kind: 'range', key: 'figX', label: 'Nudge X', min: -20, max: 40, step: 0.5, unit: 'vw' },
-      { kind: 'range', key: 'figY', label: 'Nudge Y', min: -40, max: 20, step: 0.5, unit: 'vh' },
-      { kind: 'range', key: 'figPosX', label: 'Crop focus X', min: 0, max: 100, step: 1, unit: '%' },
-      { kind: 'range', key: 'figPosY', label: 'Crop focus Y', min: 0, max: 100, step: 1, unit: '%' },
-      { kind: 'range', key: 'figScale', label: 'Zoom', min: 0.6, max: 2, step: 0.01 },
-      { kind: 'range', key: 'figOpacity', label: 'Opacity', min: 0.1, max: 1, step: 0.01 },
+      { kind: 'range', key: 'dotSpacing', label: 'Spacing', min: 10, max: 60, step: 1, unit: 'px' },
+      { kind: 'range', key: 'dotSize', label: 'Dot radius', min: 0.4, max: 4, step: 0.1, unit: 'px' },
+      { kind: 'range', key: 'dotAlpha', label: 'Resting alpha', min: 0.02, max: 0.5, step: 0.01 },
+      { kind: 'range', key: 'spotRadius', label: 'Cursor reach', min: 60, max: 420, step: 5, unit: 'px' },
+      { kind: 'range', key: 'spotBoost', label: 'Lift', min: 0, max: 0.84, step: 0.02 },
+      { kind: 'range', key: 'spotRipple', label: 'Ripple', min: 0, max: 1.2, step: 0.05 },
+    ],
+  },
+  {
+    title: 'Portrait',
+    controls: [
+      { kind: 'range', key: 'portraitSize', label: 'Circle size', min: 110, max: 340, step: 2, unit: 'px' },
+      { kind: 'range', key: 'brushSize', label: 'Brush', min: 8, max: 70, step: 1, unit: 'px' },
+      { kind: 'range', key: 'idleDelay', label: 'Idle before resolve', min: 0.5, max: 8, step: 0.1, unit: 's' },
+      { kind: 'range', key: 'resolveTime', label: 'Resolve time', min: 0.2, max: 3, step: 0.05, unit: 's' },
     ],
   },
   {
@@ -106,6 +113,7 @@ const GROUPS: Group[] = [
       { kind: 'color', key: 'text', label: 'Text' },
       { kind: 'color', key: 'textDim', label: 'Secondary text' },
       { kind: 'color', key: 'accent', label: 'Accent' },
+      { kind: 'color', key: 'dot', label: 'Dots' },
     ],
   },
   {
@@ -201,7 +209,7 @@ export default function HeroTuner() {
   const [openGroups, setOpenGroups] = useState<string[]>(['Text', 'Layout'])
 
   const copy = async () => {
-    const css = exportCss(tuning)
+    const css = `${exportCss(tuning)}\n\n${exportDefaults(tuning)}`
     try {
       await navigator.clipboard.writeText(css)
       setCopied(true)
@@ -266,10 +274,13 @@ export default function HeroTuner() {
         <section className="tuner-group">
           <p className="tuner-note">
             Changes are saved in this browser only. The live site keeps the defaults until
-            the values are written into <code>styles.css</code>. Use Copy CSS and hand it
-            over to bake them in.
+            the values are written into the source. The first block below goes into{' '}
+            <code>styles.css</code>; the second replaces the matching lines of{' '}
+            <code>DEFAULTS</code> in <code>src/lib/heroTuning.ts</code>, because the
+            canvases read those numbers directly and no CSS property carries them.
           </p>
           <textarea className="tuner-export" readOnly rows={6} value={exportCss(tuning)} />
+          <textarea className="tuner-export" readOnly rows={5} value={exportDefaults(tuning)} />
         </section>
       </div>
     </aside>

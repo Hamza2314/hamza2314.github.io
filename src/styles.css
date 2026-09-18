@@ -135,8 +135,9 @@ a {
 }
 
 /* ----------------------------------------------------------------- hero ---
-   Full bleed, subject left, copy right. The name, role and intro are real DOM
-   text: selectable, indexable, and present with JavaScript off.
+   Full bleed, centred stack: portrait, name, role, intro, links. The name,
+   role and intro are real DOM text: selectable, indexable, and present with
+   JavaScript off.
 
    Opaque ground, deliberately: the WebGL canvas is position:fixed and would
    otherwise paint through the first viewport.                                */
@@ -153,8 +154,27 @@ a {
   height: var(--h-height, 100vh);
   background: var(--bg);
   display: grid;
-  grid-template-columns: var(--h-split, 38%) minmax(0, 1fr);
-  align-items: center;
+  place-items: center;
+}
+
+/* --- dot lattice ---
+   Two stacked canvases, both written by DotField: the resting grid, and the
+   dots currently lifted under the cursor. Sized in script, so the rules here
+   only have to place them.                                                   */
+
+.hero-dots {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-dots canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* --- ambient light ---
@@ -167,55 +187,76 @@ a {
   z-index: 1;
   pointer-events: none;
   background: radial-gradient(
-    var(--h-glow-rx, 58%) var(--h-glow-ry, 52%) at
-      calc(var(--h-glow-x, 75%) + var(--gx, 0vw))
-      calc(var(--h-glow-y, 85%) + var(--gy, 0vh)),
-    rgba(200, 205, 212, var(--h-glow-a, 0.11)),
-    rgba(200, 205, 212, calc(var(--h-glow-a, 0.11) * 0.45)) 42%,
+    var(--h-glow-rx, 48%) var(--h-glow-ry, 46%) at
+      calc(var(--h-glow-x, 50%) + var(--gx, 0vw))
+      calc(var(--h-glow-y, 32%) + var(--gy, 0vh)),
+    rgba(200, 205, 212, var(--h-glow-a, 0.13)),
+    rgba(200, 205, 212, calc(var(--h-glow-a, 0.13) * 0.45)) 42%,
     rgba(200, 205, 212, 0) 72%
   );
 }
 
-/* --- subject ---
-   Bottom-anchored and hanging below the fold, so the waist crop is off-screen
-   rather than floating as a cut-off torso.                                   */
+/* --- the stack --- */
+
+.hero-inner {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 clamp(20px, 5vw, 56px);
+}
 
 .hero-figure {
-  position: absolute;
-  z-index: 2;
-  left: var(--h-fig-x, 2vw);
-  bottom: var(--h-fig-y, -7vh);
-  width: var(--h-fig-w, 38%);
-  height: var(--h-fig-h, 82vh);
-  opacity: var(--h-fig-opacity, 1);
-  overflow: hidden;
-  transform-origin: 50% 100%;
+  margin-bottom: 36px;
   will-change: transform;
 }
 
-.hero-photo {
+/* --- subject ---
+   A scratch card. The <img> is the portrait proper and the canvas over it is
+   the effect; with no script, or under reduced motion, the canvas is never
+   created and the image alone is the whole component.
+
+   min() rather than a media query on the size, because the tuning panel sets
+   --p-size on :root and a rule here redefining it would shadow the panel.    */
+
+.portrait {
+  position: relative;
+  width: min(var(--p-size, 200px), 44vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: crosshair;
+  /* A hairline to separate the circle from the ground, and a long soft shadow
+     so it sits above the lattice rather than in it. */
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 26px 50px -28px rgba(0, 0, 0, 0.95);
+}
+
+.portrait-img,
+.portrait-canvas {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.hero-photo img {
-  width: 100%;
-  height: 100%;
+.portrait-img {
   object-fit: cover;
-  object-position: var(--h-fig-pos-x, 50%) var(--h-fig-pos-y, 0%);
-  transform: scale(var(--h-fig-scale, 1));
-  transform-origin: var(--h-fig-pos-x, 50%) var(--h-fig-pos-y, 0%);
+}
+
+.portrait-canvas {
+  z-index: 1;
 }
 
 /* --- copy --- */
 
 .hero-text {
   position: relative;
-  z-index: 3;
-  grid-column: 2;
   max-width: var(--h-text-w, 52ch);
-  padding-right: clamp(20px, 5vw, 56px);
   translate: var(--h-text-x, 0px) var(--h-text-y, 0px);
 }
 
@@ -270,14 +311,20 @@ a {
   line-height: var(--h-intro-lh, 1.6);
   max-width: var(--h-intro-measure, 42ch);
   color: var(--text-dim);
-  margin: 0 0 36px;
+  margin: 0 auto 36px;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 12px 26px;
+}
+
+/* The contact block reuses .hero-actions, and is left-aligned down there. */
+.contact .hero-actions {
+  justify-content: flex-start;
 }
 
 .hero-actions > a {
@@ -513,64 +560,33 @@ a {
     grid-template-columns: 116px minmax(0, 1fr);
     gap: 0 28px;
   }
-
-  .hero {
-    grid-template-columns: 34% minmax(0, 1fr);
-  }
-
-  .hero-figure {
-    width: 40%;
-  }
 }
 
-/* --- stacked hero ---
-   The side-by-side split has nowhere to go on a portrait phone: the subject
-   would be a sliver and the measure would collapse. Stack instead, with the
-   crop pulled in tighter to head and shoulders.                              */
+/* --- hero on a phone ---
+   The stack already centres and already scales, so the only things left are
+   the height, which wants svh rather than a fixed viewport unit, and the name,
+   which is the one piece of type that cannot fend for itself.                */
 
 @media (max-width: 768px) {
   .hero {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    /* Base rule centres grid items; as a column flexbox that would centre the
-       figure horizontally instead of anchoring it left. */
-    align-items: flex-start;
     height: auto;
     min-height: 100svh;
-    padding: 6vh 0 7vh;
+    padding: 8vh 0 9vh;
   }
 
   .hero-figure {
-    position: relative;
-    left: auto;
-    bottom: auto;
-    width: 76%;
-    height: 38vh;
-    margin: 0 0 5vh clamp(16px, 5vw, 32px);
-  }
-
-  /* The tight crop is a real derivative, so nothing is upscaled here. */
-  .hero-photo img {
-    object-position: top center;
+    margin-bottom: 30px;
   }
 
   .hero-name {
     font-size: clamp(34px, 11vw, 52px);
   }
 
-  .hero-text {
-    grid-column: auto;
-    max-width: none;
-    width: 100%;
-    padding: 0 clamp(16px, 5vw, 32px);
-  }
-
   .hero-glow {
     background: radial-gradient(
-      70% 40% at calc(70% + var(--gx, 0vw)) calc(80% + var(--gy, 0vh)),
-      rgba(200, 205, 212, 0.075),
-      rgba(200, 205, 212, 0.035) 44%,
+      78% 32% at calc(50% + var(--gx, 0vw)) calc(26% + var(--gy, 0vh)),
+      rgba(200, 205, 212, 0.085),
+      rgba(200, 205, 212, 0.04) 44%,
       rgba(200, 205, 212, 0) 74%
     );
   }

@@ -29,7 +29,17 @@
       "Read(**)",
       "Write(**)",
       "Edit(**)",
-      "PowerShell(Get-ChildItem \"C:\\\\Basisordner\\\\MasriH.DVZNT1\\\\Profil\\\\Desktop\\\\portfolio\\\\assets\" -File | ForEach-Object { \"{0,-30} {1:N0} KB   {2}\" -f $_.Name, \\($_.Length/1KB\\), $_.LastWriteTime })"
+      "PowerShell(Get-ChildItem \"C:\\\\Basisordner\\\\MasriH.DVZNT1\\\\Profil\\\\Desktop\\\\portfolio\\\\assets\" -File | ForEach-Object { \"{0,-30} {1:N0} KB   {2}\" -f $_.Name, \\($_.Length/1KB\\), $_.LastWriteTime })",
+      "PowerShell(node -e \"const sharp=require\\('sharp'\\);const fs=require\\('fs'\\);\\(async\\(\\)=>{for\\(const f of fs.readdirSync\\('assets'\\)\\){const m=await sharp\\('assets/'+f\\).metadata\\(\\);console.log\\(f.padEnd\\(28\\), m.width+'x'+m.height, 'ch='+m.channels, 'alpha='+!!m.hasAlpha, \\(fs.statSync\\('assets/'+f\\).size/1024/1024\\).toFixed\\(2\\)+'MB'\\)}}\\)\\(\\)\")",
+      "PowerShell(node scripts/build-circle-photos.mjs --preview)",
+      "PowerShell(npx tsc -b --pretty false)",
+      "PowerShell(node node_modules\\\\typescript\\\\bin\\\\tsc -b --pretty false)",
+      "PowerShell(node node_modules\\\\vite\\\\bin\\\\vite.js build 2>&1)",
+      "PowerShell(node node_modules\\\\vite\\\\bin\\\\vite.js preview --port 4173 --strictPort)",
+      "PowerShell(node scripts/shoot-hero.mjs)",
+      "PowerShell(Select-String -Path index.html -Pattern 'hero|preload|circle' -SimpleMatch:$false | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
+      "PowerShell(Get-Process -Name node -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne $PID } | Out-Null; git status --short)",
+      "PowerShell(node node_modules\\\\vite\\\\bin\\\\vite.js preview --port 4173 --strictPort --host)"
     ]
   }
 }

@@ -1,11 +1,15 @@
 /**
  * Live tuning store for the hero section.
  *
- * Every knob maps to a CSS custom property that the hero rules already read,
- * so changing one repaints without React re-rendering anything. Values persist
- * to localStorage, which means they are local to this browser: the deployed
- * site shows the defaults until the numbers are baked into styles.css. The
- * panel's "Copy CSS" button produces exactly that block.
+ * Most knobs map to a CSS custom property that the hero rules already read, so
+ * changing one repaints without React re-rendering anything. The rest drive the
+ * two canvases, which read them straight out of this store each frame and
+ * repaint on the subscription below.
+ *
+ * Values persist to localStorage, which means they are local to this browser:
+ * the deployed site shows the defaults until the numbers are baked in. The
+ * panel exports both halves, because they bake into different files, the CSS
+ * ones into styles.css and the canvas ones into DEFAULTS here.
  */
 
 export type Tuning = {
@@ -33,20 +37,25 @@ export type Tuning = {
 
   // layout
   heroHeight: number
-  splitLeft: number
   textWidth: number
   textShiftX: number
   textShiftY: number
 
-  // figure
-  figWidth: number
-  figHeight: number
-  figX: number
-  figY: number
-  figPosX: number
-  figPosY: number
-  figScale: number
-  figOpacity: number
+  // portrait
+  portraitSize: number
+
+  // dot field (canvas)
+  dotSpacing: number
+  dotSize: number
+  dotAlpha: number
+  spotRadius: number
+  spotBoost: number
+  spotRipple: number
+
+  // scratch (canvas)
+  brushSize: number
+  idleDelay: number
+  resolveTime: number
 
   // glow
   glowX: number
@@ -61,6 +70,7 @@ export type Tuning = {
   text: string
   textDim: string
   accent: string
+  dot: string
 
   // motion
   parallax: number
@@ -87,35 +97,60 @@ export const DEFAULTS: Tuning = {
   introLeading: 1.6,
 
   heroHeight: 100,
-  splitLeft: 38,
   textWidth: 52,
   textShiftX: 0,
   textShiftY: 0,
 
-  figWidth: 38,
-  figHeight: 82,
-  figX: 2,
-  figY: -7,
-  figPosX: 50,
-  figPosY: 0,
-  figScale: 1,
-  figOpacity: 1,
+  portraitSize: 200,
 
-  glowX: 75,
-  glowY: 85,
-  glowRX: 58,
-  glowRY: 52,
-  glowAlpha: 0.11,
+  dotSpacing: 26,
+  dotSize: 1.3,
+  dotAlpha: 0.16,
+  spotRadius: 190,
+  spotBoost: 0.6,
+  spotRipple: 0.5,
+
+  brushSize: 26,
+  idleDelay: 2.5,
+  resolveTime: 0.7,
+
+  // Centred on the portrait now rather than on the old left-hand figure, so the
+  // circle sits in the brightest part of the field instead of beside it.
+  glowX: 50,
+  glowY: 32,
+  glowRX: 48,
+  glowRY: 46,
+  glowAlpha: 0.13,
   glowDrift: 4,
 
   bg: '#0c0d0f',
   text: '#f0f0ee',
   textDim: '#8a8d91',
   accent: '#c8cdd4',
+  dot: '#aab3c2',
 
-  parallax: 0.5,
+  // Gentler than the old full-bleed figure wanted: a 200px circle travelling
+  // half a viewport reads as the thing falling off the page.
+  parallax: 0.18,
   entrance: true,
 }
+
+/**
+ * The knobs the canvases own. They are listed rather than inferred because the
+ * distinction that matters is not the type but where the value has to be baked
+ * once it is settled: these go into DEFAULTS above, everything else into CSS.
+ */
+const CANVAS_KEYS = [
+  'dotSpacing',
+  'dotSize',
+  'dotAlpha',
+  'spotRadius',
+  'spotBoost',
+  'spotRipple',
+  'brushSize',
+  'idleDelay',
+  'resolveTime',
+] as const
 
 /** Knob -> CSS custom property. Anything absent here is not a CSS value. */
 function cssVars(t: Tuning): Record<string, string> {
@@ -135,19 +170,11 @@ function cssVars(t: Tuning): Record<string, string> {
     '--h-intro-lh': `${t.introLeading}`,
 
     '--h-height': `${t.heroHeight}vh`,
-    '--h-split': `${t.splitLeft}%`,
     '--h-text-w': `${t.textWidth}ch`,
     '--h-text-x': `${t.textShiftX}px`,
     '--h-text-y': `${t.textShiftY}px`,
 
-    '--h-fig-w': `${t.figWidth}%`,
-    '--h-fig-h': `${t.figHeight}vh`,
-    '--h-fig-x': `${t.figX}vw`,
-    '--h-fig-y': `${t.figY}vh`,
-    '--h-fig-pos-x': `${t.figPosX}%`,
-    '--h-fig-pos-y': `${t.figPosY}%`,
-    '--h-fig-scale': `${t.figScale}`,
-    '--h-fig-opacity': `${t.figOpacity}`,
+    '--p-size': `${t.portraitSize}px`,
 
     '--h-glow-x': `${t.glowX}%`,
     '--h-glow-y': `${t.glowY}%`,
@@ -160,6 +187,7 @@ function cssVars(t: Tuning): Record<string, string> {
     '--text': t.text,
     '--text-dim': t.textDim,
     '--accent': t.accent,
+    '--dot': t.dot,
   }
 }
 
@@ -259,5 +287,20 @@ export function exportCss(t: Tuning = state): string {
     ...lines,
     '}',
     ...(textNotes.length ? ['', '/* text overrides, for src/data.ts:', ...textNotes, '*/'] : []),
+  ].join('\n')
+}
+
+/**
+ * The canvas half of the same job: the block to paste over the matching lines
+ * in DEFAULTS above. These knobs never reach the DOM, so there is no CSS
+ * property to carry them and nothing in styles.css to receive them.
+ */
+export function exportDefaults(t: Tuning = state): string {
+  const changed = CANVAS_KEYS.filter((key) => t[key] !== DEFAULTS[key])
+  if (!changed.length) return '// canvas tuning: unchanged from defaults'
+
+  return [
+    '// canvas tuning, for DEFAULTS in src/lib/heroTuning.ts',
+    ...changed.map((key) => `  ${key}: ${t[key]},`),
   ].join('\n')
 }
