@@ -203,9 +203,27 @@ a {
     ellipse var(--h-glow-rx, 80%) var(--h-glow-ry, 50%) at
       calc(var(--h-glow-x, 50%) + var(--gx, 0vw))
       calc(var(--h-glow-y, 20%) + var(--gy, 0vh)),
-    rgba(200, 205, 212, var(--h-glow-a, 0.13)) 0%,
+    rgba(200, 205, 212, var(--h-glow-a, 0.05)) 0%,
     rgba(200, 205, 212, 0) 70%
   );
+}
+
+/* --- overhead light ---
+   The shaft, painted by HeroBeam. The buffer is small and deliberately
+   stretched: the falloffs are low frequency so they upscale cleanly, and the
+   grain wants softening rather than resolving.                               */
+
+.hero-beam {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-beam canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* --- the stack --- */

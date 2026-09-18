@@ -5,6 +5,7 @@ import Lenis from 'lenis'
 import Scene from './components/Scene'
 import Magnetic from './components/Magnetic'
 import ParticleField from './components/ParticleField'
+import HeroBeam from './components/HeroBeam'
 import ScratchPortrait from './components/ScratchPortrait'
 import {
   getServerTuning,
@@ -214,6 +215,7 @@ export default function App() {
       <header className="hero" id="top" ref={hero}>
         <ParticleField />
         <div className="hero-glow" ref={glow} aria-hidden="true" />
+        <HeroBeam />
 
         <div className="hero-inner">
           <div className="hero-figure" ref={figure}>

@@ -90,6 +90,16 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    title: 'Overhead beam',
+    controls: [
+      { kind: 'range', key: 'beamTop', label: 'Aperture', min: 0, max: 60, step: 1, unit: '%' },
+      { kind: 'range', key: 'beamAngle', label: 'Spread angle', min: 2, max: 60, step: 1, unit: '°' },
+      { kind: 'range', key: 'beamHeight', label: 'Reach', min: 20, max: 100, step: 1, unit: '%' },
+      { kind: 'range', key: 'beamStrength', label: 'Strength', min: 0, max: 0.6, step: 0.01 },
+      { kind: 'range', key: 'beamGrain', label: 'Grain', min: 0, max: 0.5, step: 0.01 },
+    ],
+  },
+  {
     title: 'Portrait',
     controls: [
       { kind: 'range', key: 'portraitSize', label: 'Circle size', min: 110, max: 340, step: 2, unit: 'px' },

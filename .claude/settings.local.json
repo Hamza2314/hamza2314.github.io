@@ -45,7 +45,9 @@
       "PowerShell(foreach \\($f in 'index.d.ts','ParticlesProvider.d.ts','Particles.d.ts','IParticlesProps.d.ts'\\) { Write-Output \"===== $f =====\"; Get-Content \"node_modules\\\\@tsparticles\\\\react\\\\$f\" })",
       "PowerShell(node node_modules\\\\vite\\\\bin\\\\vite.js build --ssr src/entry-server.tsx --outDir dist-ssr 2>&1)",
       "PowerShell(node prerender.js)",
-      "PowerShell(git add -A)"
+      "PowerShell(git add -A)",
+      "PowerShell(Select-String -Path 'C:\\\\Users\\\\MasriH\\\\Desktop\\\\Phantom-Website\\\\src\\\\components\\\\switchhouse\\\\DESIGN.md' -Pattern 'skylight|god-ray|God-ray|beam' | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
+      "PowerShell(git commit -q -F \"C:\\\\Users\\\\MasriH\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Basisordner-MasriH-DVZNT1-Profil-Desktop-portfolio\\\\bb9ce255-78f8-4f2d-bea7-cef14a89f296\\\\scratchpad\\\\msg.txt\")"
     ]
   }
 }

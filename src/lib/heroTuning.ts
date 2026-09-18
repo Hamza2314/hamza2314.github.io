@@ -47,6 +47,13 @@ export type Tuning = {
   // particle field
   particlePreset: number
 
+  // overhead beam (canvas)
+  beamTop: number
+  beamAngle: number
+  beamHeight: number
+  beamStrength: number
+  beamGrain: number
+
   // scratch (canvas)
   brushSize: number
   idleDelay: number
@@ -101,6 +108,14 @@ export const DEFAULTS: Tuning = {
   // Constellation, the first of the ten.
   particlePreset: 0,
 
+  // A narrow aperture, as a percentage of the hero's width, opening at a fixed
+  // angle from there. Reach is a percentage of the hero's height.
+  beamTop: 12,
+  beamAngle: 28,
+  beamHeight: 94,
+  beamStrength: 0.3,
+  beamGrain: 0.14,
+
   brushSize: 26,
   idleDelay: 2.5,
   resolveTime: 0.7,
@@ -111,7 +126,9 @@ export const DEFAULTS: Tuning = {
   glowY: 20,
   glowRX: 80,
   glowRY: 50,
-  glowAlpha: 0.13,
+  // Ambient only now: the shaft is the light source, and this just keeps the
+  // upper half from reading as flat black behind it.
+  glowAlpha: 0.05,
   glowDrift: 4,
 
   bg: '#0c0d0f',
@@ -133,6 +150,11 @@ export const DEFAULTS: Tuning = {
  */
 const CANVAS_KEYS = [
   'particlePreset',
+  'beamTop',
+  'beamAngle',
+  'beamHeight',
+  'beamStrength',
+  'beamGrain',
   // The particle colour is handed to the engine, not to a stylesheet. It has to
   // bake alongside the preset or a baked value would sit in CSS being read by
   // nothing while the field kept using the default.
