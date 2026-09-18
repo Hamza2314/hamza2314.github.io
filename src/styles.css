@@ -183,7 +183,16 @@ a {
 
 /* --- ambient light ---
    Cool silver, not blue: a blue wash behind a person is the house style of
-   every AI landing page. Weak enough that the edge is not findable.          */
+   every AI landing page. Weak enough that the edge is not findable.
+
+   Wide and shallow, sitting near the top edge. The aspect ratio is what does
+   the work: a near-circle a third of the way down reads as a pool of light on
+   the page, while a flat ellipse up at 20% reads as light spilling in from
+   above the frame. One falloff stop rather than two, so the spill is smooth
+   the whole way out instead of stepping partway down.
+
+   Unlike the gradient this is modelled on, it drifts: --gx and --gy are
+   written by the pointer loop in App.                                        */
 
 .hero-glow {
   position: absolute;
@@ -191,12 +200,11 @@ a {
   z-index: 1;
   pointer-events: none;
   background: radial-gradient(
-    var(--h-glow-rx, 48%) var(--h-glow-ry, 46%) at
+    ellipse var(--h-glow-rx, 80%) var(--h-glow-ry, 50%) at
       calc(var(--h-glow-x, 50%) + var(--gx, 0vw))
-      calc(var(--h-glow-y, 32%) + var(--gy, 0vh)),
-    rgba(200, 205, 212, var(--h-glow-a, 0.13)),
-    rgba(200, 205, 212, calc(var(--h-glow-a, 0.13) * 0.45)) 42%,
-    rgba(200, 205, 212, 0) 72%
+      calc(var(--h-glow-y, 20%) + var(--gy, 0vh)),
+    rgba(200, 205, 212, var(--h-glow-a, 0.13)) 0%,
+    rgba(200, 205, 212, 0) 70%
   );
 }
 
@@ -586,12 +594,13 @@ a {
     font-size: clamp(34px, 11vw, 52px);
   }
 
+  /* Wider still relative to the viewport, and higher: a tall narrow screen
+     needs a flatter ellipse to read as the same overhead light. */
   .hero-glow {
     background: radial-gradient(
-      78% 32% at calc(50% + var(--gx, 0vw)) calc(26% + var(--gy, 0vh)),
-      rgba(200, 205, 212, 0.085),
-      rgba(200, 205, 212, 0.04) 44%,
-      rgba(200, 205, 212, 0) 74%
+      ellipse 130% 30% at calc(50% + var(--gx, 0vw)) calc(15% + var(--gy, 0vh)),
+      rgba(200, 205, 212, 0.1) 0%,
+      rgba(200, 205, 212, 0) 70%
     );
   }
 }

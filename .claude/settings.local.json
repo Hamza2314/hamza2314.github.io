@@ -44,7 +44,8 @@
       "PowerShell(node \"C:\\\\Users\\\\MasriH\\\\nodejs\\\\node_modules\\\\npm\\\\bin\\\\npm-cli.js\" install @tsparticles/engine@^4.0.5 @tsparticles/react@^4.0.5 @tsparticles/slim@^4.0.5 2>&1)",
       "PowerShell(foreach \\($f in 'index.d.ts','ParticlesProvider.d.ts','Particles.d.ts','IParticlesProps.d.ts'\\) { Write-Output \"===== $f =====\"; Get-Content \"node_modules\\\\@tsparticles\\\\react\\\\$f\" })",
       "PowerShell(node node_modules\\\\vite\\\\bin\\\\vite.js build --ssr src/entry-server.tsx --outDir dist-ssr 2>&1)",
-      "PowerShell(node prerender.js)"
+      "PowerShell(node prerender.js)",
+      "PowerShell(git add -A)"
     ]
   }
 }

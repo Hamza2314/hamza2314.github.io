@@ -105,12 +105,12 @@ export const DEFAULTS: Tuning = {
   idleDelay: 2.5,
   resolveTime: 0.7,
 
-  // Centred on the portrait now rather than on the old left-hand figure, so the
-  // circle sits in the brightest part of the field instead of beside it.
+  // Wide and shallow, near the top edge: light arriving from above the frame
+  // rather than a pool of it sitting on the page.
   glowX: 50,
-  glowY: 32,
-  glowRX: 48,
-  glowRY: 46,
+  glowY: 20,
+  glowRX: 80,
+  glowRY: 50,
   glowAlpha: 0.13,
   glowDrift: 4,
 
