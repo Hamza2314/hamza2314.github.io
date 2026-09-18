@@ -44,13 +44,8 @@ export type Tuning = {
   // portrait
   portraitSize: number
 
-  // dot field (canvas)
-  dotSpacing: number
-  dotSize: number
-  dotAlpha: number
-  spotRadius: number
-  spotBoost: number
-  spotRipple: number
+  // particle field
+  particlePreset: number
 
   // scratch (canvas)
   brushSize: number
@@ -103,12 +98,8 @@ export const DEFAULTS: Tuning = {
 
   portraitSize: 200,
 
-  dotSpacing: 26,
-  dotSize: 1.3,
-  dotAlpha: 0.16,
-  spotRadius: 190,
-  spotBoost: 0.6,
-  spotRipple: 0.5,
+  // Constellation, the first of the ten.
+  particlePreset: 0,
 
   brushSize: 26,
   idleDelay: 2.5,
@@ -141,12 +132,11 @@ export const DEFAULTS: Tuning = {
  * once it is settled: these go into DEFAULTS above, everything else into CSS.
  */
 const CANVAS_KEYS = [
-  'dotSpacing',
-  'dotSize',
-  'dotAlpha',
-  'spotRadius',
-  'spotBoost',
-  'spotRipple',
+  'particlePreset',
+  // The particle colour is handed to the engine, not to a stylesheet. It has to
+  // bake alongside the preset or a baked value would sit in CSS being read by
+  // nothing while the field kept using the default.
+  'dot',
   'brushSize',
   'idleDelay',
   'resolveTime',
@@ -187,7 +177,6 @@ function cssVars(t: Tuning): Record<string, string> {
     '--text': t.text,
     '--text-dim': t.textDim,
     '--accent': t.accent,
-    '--dot': t.dot,
   }
 }
 
@@ -301,6 +290,9 @@ export function exportDefaults(t: Tuning = state): string {
 
   return [
     '// canvas tuning, for DEFAULTS in src/lib/heroTuning.ts',
-    ...changed.map((key) => `  ${key}: ${t[key]},`),
+    ...changed.map((key) => {
+      const value = t[key]
+      return `  ${key}: ${typeof value === 'string' ? `'${value}'` : value},`
+    }),
   ].join('\n')
 }

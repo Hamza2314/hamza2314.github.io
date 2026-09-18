@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import Scene from './components/Scene'
 import Magnetic from './components/Magnetic'
-import DotField from './components/DotField'
+import ParticleField from './components/ParticleField'
 import ScratchPortrait from './components/ScratchPortrait'
 import {
   getServerTuning,
@@ -212,7 +212,7 @@ export default function App() {
       </nav>
 
       <header className="hero" id="top" ref={hero}>
-        <DotField />
+        <ParticleField />
         <div className="hero-glow" ref={glow} aria-hidden="true" />
 
         <div className="hero-inner">

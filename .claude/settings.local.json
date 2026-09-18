@@ -39,7 +39,12 @@
       "PowerShell(node scripts/shoot-hero.mjs)",
       "PowerShell(Select-String -Path index.html -Pattern 'hero|preload|circle' -SimpleMatch:$false | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
       "PowerShell(Get-Process -Name node -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne $PID } | Out-Null; git status --short)",
-      "PowerShell(node node_modules\\\\vite\\\\bin\\\\vite.js preview --port 4173 --strictPort --host)"
+      "PowerShell(node node_modules\\\\vite\\\\bin\\\\vite.js preview --port 4173 --strictPort --host)",
+      "PowerShell(git checkout -b hero-particle-field)",
+      "PowerShell(node \"C:\\\\Users\\\\MasriH\\\\nodejs\\\\node_modules\\\\npm\\\\bin\\\\npm-cli.js\" install @tsparticles/engine@^4.0.5 @tsparticles/react@^4.0.5 @tsparticles/slim@^4.0.5 2>&1)",
+      "PowerShell(foreach \\($f in 'index.d.ts','ParticlesProvider.d.ts','Particles.d.ts','IParticlesProps.d.ts'\\) { Write-Output \"===== $f =====\"; Get-Content \"node_modules\\\\@tsparticles\\\\react\\\\$f\" })",
+      "PowerShell(node node_modules\\\\vite\\\\bin\\\\vite.js build --ssr src/entry-server.tsx --outDir dist-ssr 2>&1)",
+      "PowerShell(node prerender.js)"
     ]
   }
 }

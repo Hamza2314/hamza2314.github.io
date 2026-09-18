@@ -10,6 +10,7 @@ import {
   subscribe,
   type Tuning,
 } from '../lib/heroTuning'
+import { PARTICLE_PRESETS } from '../lib/particlePresets'
 
 /**
  * Design panel for the hero. Lazy-loaded and only mounted with ?tune in the
@@ -33,6 +34,7 @@ type Control =
   | { kind: 'range'; key: NumKey; label: string; min: number; max: number; step: number; unit?: string }
   | { kind: 'color'; key: StrKey; label: string }
   | { kind: 'toggle'; key: BoolKey; label: string }
+  | { kind: 'select'; key: NumKey; label: string; options: string[] }
 
 type Group = { title: string; controls: Control[] }
 
@@ -76,14 +78,15 @@ const GROUPS: Group[] = [
     ],
   },
   {
-    title: 'Dot field',
+    title: 'Particle field',
     controls: [
-      { kind: 'range', key: 'dotSpacing', label: 'Spacing', min: 10, max: 60, step: 1, unit: 'px' },
-      { kind: 'range', key: 'dotSize', label: 'Dot radius', min: 0.4, max: 4, step: 0.1, unit: 'px' },
-      { kind: 'range', key: 'dotAlpha', label: 'Resting alpha', min: 0.02, max: 0.5, step: 0.01 },
-      { kind: 'range', key: 'spotRadius', label: 'Cursor reach', min: 60, max: 420, step: 5, unit: 'px' },
-      { kind: 'range', key: 'spotBoost', label: 'Lift', min: 0, max: 0.84, step: 0.02 },
-      { kind: 'range', key: 'spotRipple', label: 'Ripple', min: 0, max: 1.2, step: 0.05 },
+      {
+        kind: 'select',
+        key: 'particlePreset',
+        label: 'Effect',
+        options: PARTICLE_PRESETS.map((p) => p.label),
+      },
+      { kind: 'color', key: 'dot', label: 'Particle colour' },
     ],
   },
   {
@@ -113,7 +116,6 @@ const GROUPS: Group[] = [
       { kind: 'color', key: 'text', label: 'Text' },
       { kind: 'color', key: 'textDim', label: 'Secondary text' },
       { kind: 'color', key: 'accent', label: 'Accent' },
-      { kind: 'color', key: 'dot', label: 'Dots' },
     ],
   },
   {
@@ -145,6 +147,25 @@ function Row({ control, value }: { control: Control; value: Tuning[keyof Tuning]
           value={v}
           onChange={(e) => setTuning({ [control.key]: Number(e.target.value) } as Partial<Tuning>)}
         />
+      </label>
+    )
+  }
+
+  if (control.kind === 'select') {
+    return (
+      <label className="tuner-row">
+        <span className="tuner-label">{control.label}</span>
+        <select
+          className="tuner-select"
+          value={value as number}
+          onChange={(e) => setTuning({ [control.key]: Number(e.target.value) } as Partial<Tuning>)}
+        >
+          {control.options.map((label, i) => (
+            <option key={label} value={i}>
+              {label}
+            </option>
+          ))}
+        </select>
       </label>
     )
   }
