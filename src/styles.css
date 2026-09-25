@@ -338,6 +338,12 @@ a {
   opacity: 1;
 }
 
+/* Everything that is not prose arrives the same way: a short rise, staggered,
+   after the label has finished generating. Same gating as the words above. */
+.js [data-rise] {
+  opacity: 0;
+}
+
 /* Sits between the word and the space that follows it, so it never drifts away
    from the text as the line wraps. */
 .stream-w.is-cursor::after {
@@ -378,70 +384,108 @@ a {
   color: var(--bg);
 }
 
-/* ---------------------------------------------------------------- bands --- */
+/* --------------------------------------------------------------- panels ---
+   Six of them, each filling the viewport and each composed rather than
+   stacked. The rule that makes this work is that nothing scrolls inside a
+   panel: whatever will not fit has to be cut, which is the only reliable way
+   to keep a CV page from growing without anyone deciding that it should.
 
-.band {
+   Every panel is built from the same three parts: an indexed label, a layout,
+   and the hairline grid below. Only the column count changes between them.  */
+
+.panel {
+  position: relative;
+  min-height: 100vh;
   display: grid;
-  grid-template-columns: var(--rail) minmax(0, 1fr);
-  gap: 0 40px;
-  padding: 72px 0;
+  align-content: center;
+  padding: clamp(72px, 11vh, 132px) 0;
   border-top: 1px solid var(--rule);
 }
 
-/* Real <h2>, deliberately small: it labels the band without shouting. */
-.band-label {
-  font-size: 14px;
-  font-variation-settings: 'wdth' 85;
+.panel-label {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0 0 clamp(26px, 5vh, 56px);
+  font-size: 13px;
   font-weight: 400;
-  color: var(--ink-2);
-  margin: 0;
-  padding-top: 6px;
-}
-
-.prose p {
-  max-width: var(--measure);
-  margin: 0 0 1.1em;
+  font-variation-settings: 'wdth' 85;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
   color: var(--ink-2);
 }
 
-.prose p:first-child {
-  color: var(--ink);
-  font-size: 19px;
+.panel-index {
+  color: var(--accent);
+  opacity: 0.45;
+  font-variant-numeric: tabular-nums;
 }
 
-.projects,
-.timeline {
+/* --- hairline grid ---
+   No shadows, no rounded corners: the same language as the rules this
+   replaced.
+
+   The hairlines are borders on the cells rather than a background showing
+   through one-pixel gaps. The gap trick is tidier to write but it paints the
+   whole grid area, so a row that is not full renders its empty tracks as solid
+   blocks. Borders only exist where a cell does, which means the count can
+   change without the design breaking.                                        */
+
+.cells {
+  display: grid;
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* Rules, not cards. Nothing here gets a shadow or a rounded corner. */
-.project {
-  padding: 0 0 38px;
-  margin: 0 0 38px;
+.cells-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cells-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  background: var(--bg);
+  padding: clamp(20px, 2.1vw, 30px);
+  border-right: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
 }
 
-.project:last-child {
-  border-bottom: 0;
-  margin-bottom: 0;
-  padding-bottom: 0;
+.cell-quiet {
+  justify-content: flex-end;
+  color: var(--ink-2);
 }
 
-.project-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px 16px;
-  margin-bottom: 12px;
-}
-
-.project h3 {
-  font-size: clamp(21px, 2.6vw, 28px);
-  font-variation-settings: 'wdth' 110;
+.cell h3 {
+  font-size: clamp(18px, 1.7vw, 23px);
+  font-variation-settings: 'wdth' 106;
   font-weight: 500;
   letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.cell p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* The one line that carries the weight in an Experience or Education cell. */
+.cell-key {
+  font-size: clamp(26px, 2.8vw, 38px);
+  font-variation-settings: 'wdth' 96;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink);
   margin: 0;
 }
 
@@ -449,99 +493,70 @@ a {
 .period,
 .org,
 .lvl {
-  font-size: 13.5px;
+  font-size: 13px;
   font-variation-settings: 'wdth' 85;
   color: var(--ink-2);
 }
 
-.project p {
-  max-width: var(--measure);
-  color: var(--ink-2);
-  margin: 0 0 18px;
+.cell-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
 }
 
 .stack {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 18px;
+  gap: 6px 16px;
   list-style: none;
-  margin: 0;
+  margin: auto 0 0;
   padding: 0;
 }
 
 .stack li {
-  font-size: 13.5px;
+  font-size: 13px;
   font-variation-settings: 'wdth' 85;
   color: var(--ink-2);
 }
 
-/* -------------------------------------------------------------- timeline --- */
+/* --- about --- */
 
-.timeline li {
+.about-grid {
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
-  gap: 4px 24px;
-  padding: 0 0 28px;
+  grid-template-columns: 1.15fr 1fr;
+  gap: clamp(30px, 5vw, 86px);
+  align-items: start;
 }
 
-.timeline li:last-child {
-  padding-bottom: 0;
-}
-
-.period {
-  padding-top: 4px;
-}
-
-.timeline h3 {
-  font-size: 18px;
-  font-weight: 500;
-  margin: 0 0 4px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 12px;
-  align-items: baseline;
-}
-
-.org {
-  font-weight: 400;
-}
-
-.timeline p {
-  max-width: var(--measure);
-  color: var(--ink-2);
+.about-lead {
   margin: 0;
-  font-size: 16px;
+  font-size: clamp(23px, 2.9vw, 40px);
+  line-height: 1.16;
+  letter-spacing: -0.022em;
+  font-variation-settings: 'wdth' 104;
+  color: var(--ink);
 }
 
-/* ---------------------------------------------------------------- skills --- */
-
-.skill-group {
-  margin-bottom: 28px;
+.about-rest p {
+  margin: 0 0 1.25em;
+  max-width: 48ch;
+  color: var(--ink-2);
 }
 
-.skill-group:last-child {
+.about-rest p:last-child {
   margin-bottom: 0;
 }
 
-.skill-group h3 {
-  font-size: 15px;
-  font-weight: 500;
-  margin: 0 0 10px;
-}
-
-/* --------------------------------------------------------------- contact --- */
-
-.contact {
-  padding-bottom: 110px;
-}
+/* --- contact --- */
 
 .mail {
   display: inline-block;
-  font-size: clamp(21px, 3.4vw, 34px);
-  font-variation-settings: 'wdth' 106;
+  font-size: clamp(28px, 5.4vw, 68px);
+  font-variation-settings: 'wdth' 102;
   font-weight: 500;
-  letter-spacing: -0.02em;
-  margin-bottom: 28px;
+  letter-spacing: -0.03em;
+  margin-bottom: 34px;
   border-bottom: 1px solid var(--rule);
   transition: border-color 0.2s;
 }
@@ -555,7 +570,7 @@ a {
   color: var(--ink-2);
   font-size: 14px;
   font-variation-settings: 'wdth' 85;
-  margin: 28px 0 0;
+  margin: 32px 0 0;
 }
 
 :focus-visible {
@@ -566,9 +581,13 @@ a {
 /* ------------------------------------------------------------ responsive --- */
 
 @media (max-width: 1080px) {
-  .band {
-    grid-template-columns: 116px minmax(0, 1fr);
-    gap: 0 28px;
+  .cells-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
   }
 }
 
@@ -615,19 +634,17 @@ a {
     opacity: 0.38;
   }
 
-  .band {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 52px 0;
+  /* One column, and the panel is allowed to grow past the viewport rather than
+     squeezing six cells into a phone screen. The no-inner-scroll rule is about
+     composition, and a single column has no composition to protect. */
+  .panel {
+    min-height: 100svh;
+    padding: 64px 0;
   }
 
-  .timeline li {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-
-  .timeline li .period {
-    padding-top: 0;
+  .cells-3,
+  .cells-2 {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -839,8 +856,9 @@ a {
     transition: none;
   }
 
-  /* Every band arrives already generated, and nothing blinks. */
-  .js .stream-w {
+  /* Every panel arrives already generated, and nothing blinks. */
+  .js .stream-w,
+  .js [data-rise] {
     opacity: 1;
     transition: none;
   }

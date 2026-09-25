@@ -25,35 +25,39 @@ export type Project = {
   stack: string[]
 }
 
+/**
+ * Cut to a cell. Each body is one or two sentences, because a panel that has to
+ * scroll inside itself is a list again. The long version lives in the CV.
+ */
 export const projects: Project[] = [
   {
     title: 'Excessus',
-    status: 'Prototype',
-    body: 'A client intake system for German law firms. A prospective client describes their situation in natural language; a retrieval pipeline over legal source material turns it into a structured summary the firm can act on. Built solo on the Claude API, from the retrieval architecture through to the interface.',
+    status: 'Own venture',
+    body: 'Turns a prospective client’s own account of their situation into a brief a German law firm can act on. Built solo, architecture through to the outreach that found the first firms.',
     stack: ['Claude API', 'RAG', 'Python', 'Vector search'],
   },
   {
     title: 'Phantom',
     status: 'Prototype',
-    body: 'A desktop platform for orchestrating browser automation across isolated account profiles. The hard problem is durability: a selector health system continuously validates and repairs DOM selectors as target sites change, so automations degrade visibly instead of failing silently.',
-    stack: ['TypeScript', 'Electron', 'Vite', 'SQLite', 'Playwright'],
+    body: 'Browser automation across isolated account profiles. A selector health system repairs DOM selectors as target sites change, so automations degrade visibly instead of failing silently.',
+    stack: ['TypeScript', 'Electron', 'SQLite', 'Playwright'],
   },
   {
-    title: 'AI-powered geographic search',
-    status: 'Bachelor thesis, graded 1.8',
-    body: 'Combined vector search with language models to improve retrieval quality in a geographic information system at DVZ M-V. A classifier identifies whether a user is a beginner or an expert and adapts results to match.',
+    title: 'Geographic AI search',
+    status: 'Bachelor thesis, 1.8',
+    body: 'Vector search paired with a classifier that tells a beginner from an expert and adapts the results to match. Built at DVZ M-V.',
     stack: ['Python', 'PyTorch', 'OpenAI', 'PHP'],
   },
   {
-    title: 'Multi-stage content pipeline',
+    title: 'Content pipeline',
     status: 'Freelance',
-    body: 'A full-cycle pipeline for specialist text: outline generation, drafting, legal review, SEO rework and a final editing pass, each stage a separate prompt with its own validation. Built on streaming Claude API calls with keyword research fed into the chain.',
+    body: 'Outline, draft, legal review, SEO rework, final pass — five stages, each its own prompt with its own validation, over streaming Claude calls.',
     stack: ['Claude API', 'Python', 'Prompt engineering'],
   },
   {
-    title: 'German-language email manager',
-    status: 'Personal project',
-    body: 'Classifies and prioritises incoming German email by semantic content, assigns topic tags, and drafts replies matched to the tone of the original message.',
+    title: 'Email manager',
+    status: 'Freelance',
+    body: 'Classifies and prioritises German email by semantic content, and drafts replies matched to the tone of the original.',
     stack: ['Python', 'LLM API', 'React', 'PostgreSQL'],
   },
 ]
@@ -107,6 +111,10 @@ export const skills = [
   {
     group: 'Data',
     items: ['PostgreSQL', 'MySQL', 'SQLite', 'NumPy', 'Pandas'],
+  },
+  {
+    group: 'Tools and workflow',
+    items: ['Git', 'Jira', 'n8n', 'LaTeX', 'Figma'],
   },
 ]
 

@@ -7,6 +7,7 @@ import Magnetic from './components/Magnetic'
 import ParticleField from './components/ParticleField'
 import HeroBeam from './components/HeroBeam'
 import Stream from './components/Stream'
+import Panel from './components/Panel'
 import ScratchPortrait from './components/ScratchPortrait'
 import {
   getServerTuning,
@@ -162,11 +163,19 @@ export default function App() {
         })
       }
 
-      // --- band streaming ---
-      // Each band generates itself when it is first scrolled to. The words are
-      // already in the DOM; all that moves is opacity and which word the caret
-      // is sitting after.
-      const blocks = Array.from(root.current?.querySelectorAll('.stream') ?? [])
+      // --- panel arrival ---
+      // Every panel arrives the same way and that is the whole point of it:
+      // the label generates word by word with a caret, then the panel's
+      // contents rise in a stagger. Six panels, one gesture.
+      //
+      // Nothing is injected. The words are already in the DOM, so all that
+      // moves here is opacity and which word the caret is sitting after.
+      const panels = Array.from(root.current?.querySelectorAll<HTMLElement>('.panel') ?? [])
+
+      const land = (panel: HTMLElement) => {
+        for (const word of panel.querySelectorAll('.stream-w')) word.classList.add('is-on')
+        gsap.set(panel.querySelectorAll('[data-rise]'), { opacity: 1, y: 0 })
+      }
 
       // Once per tab, so a visitor reading back up the page is not made to wait
       // again. `?tune` opts out of that, because iterating on an effect you can
@@ -175,40 +184,26 @@ export default function App() {
       const alreadyRan = !tuning && sessionStorage.getItem(STREAM_KEY) === '1'
 
       if (reduced || alreadyRan || !getTuning().streamOn) {
-        for (const block of blocks) {
-          for (const word of block.querySelectorAll('.stream-w')) {
-            word.classList.add('is-on')
-          }
-        }
+        panels.forEach(land)
       } else {
-        // Blocks sharing a [data-stream] ancestor generate one after another,
-        // so there is only ever one caret on screen. Without this the three
-        // About paragraphs run in parallel and the page appears to have three
-        // cursors, which is not what streaming looks like.
-        const groups = new Map<Element, Element[]>()
-        for (const block of blocks) {
-          const key = block.closest('[data-stream]') ?? block
-          const list = groups.get(key)
-          if (list) list.push(block)
-          else groups.set(key, [block])
-        }
-
-        for (const [key, list] of groups) {
+        for (const panel of panels) {
           ScrollTrigger.create({
-            trigger: key,
-            start: 'top 88%',
+            trigger: panel,
+            start: 'top 72%',
             once: true,
             onEnter: () => {
               const speed = getTuning().streamSpeed
               const tl = gsap.timeline()
 
-              for (const block of list) {
+              // Streams run in DOM order, one after another, so there is only
+              // ever one caret on screen. Running them together reads as a page
+              // with several cursors, which is not what streaming looks like.
+              for (const block of panel.querySelectorAll('.stream')) {
                 const words = Array.from(block.querySelectorAll<HTMLElement>('.stream-w'))
                 if (!words.length) continue
 
-                // One tween of a counter rather than one tween per word: a long
-                // band is a couple of hundred words, and they only ever need a
-                // class adding in order.
+                // One tween of a counter rather than one tween per word: the
+                // words only ever need a class adding, in order.
                 const state = { i: 0 }
                 let shown = 0
                 let caret: HTMLElement | null = null
@@ -235,9 +230,19 @@ export default function App() {
                       caret?.classList.remove('is-cursor')
                     },
                   },
-                  // A beat between blocks, which is what reads as a paragraph
-                  // break rather than one long run of text.
-                  '>0.14',
+                  '>0.1',
+                )
+              }
+
+              const rises = panel.querySelectorAll('[data-rise]')
+              if (rises.length) {
+                tl.fromTo(
+                  rises,
+                  { opacity: 0, y: 20 },
+                  { opacity: 1, y: 0, duration: 0.6, stagger: 0.07, ease: 'power3.out' },
+                  // Overlapping the tail of the label keeps the panel from
+                  // arriving in two visibly separate halves.
+                  '>-0.18',
                 )
               }
             },
@@ -300,108 +305,94 @@ export default function App() {
       </header>
 
       <div className="shell">
-        <section className="band" id="about">
-          <h2 className="band-label">
-            <Stream text="About" />
-          </h2>
-          {/* data-stream chains these paragraphs into one sequence, so the
-              caret moves through them in order rather than three at once. */}
-          <div className="band-body prose" data-stream>
-            {profile.about.map((p, i) => (
-              <p key={i}>
-                <Stream text={p} />
-              </p>
+        {/* The lead paragraph generates; the rest rises with everything else,
+            because four paragraphs of streaming is a reader kept waiting. */}
+        <Panel id="about" index={1} label="About">
+          <div className="about-grid">
+            <p className="about-lead">
+              <Stream text={profile.about[0]} />
+            </p>
+            <div className="about-rest">
+              {profile.about.slice(1).map((p, i) => (
+                <p key={i} data-rise>
+                  {p}
+                </p>
+              ))}
+            </div>
+          </div>
+        </Panel>
+
+        <Panel id="projects" index={2} label="Projects">
+          <ol className="cells cells-3">
+            {projects.map((p, i) => (
+              <li className="cell" key={p.title} data-project={i} data-rise>
+                <div className="cell-head">
+                  <h3>{p.title}</h3>
+                  <span className="project-status">{p.status}</span>
+                </div>
+                <p>{p.body}</p>
+                <ul className="stack">
+                  {p.stack.map((s) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ul>
+              </li>
             ))}
-          </div>
-        </section>
 
-        <section className="band" id="work">
-          <h2 className="band-label">
-            <Stream text="Selected work" />
-          </h2>
-          <div className="band-body">
-            <ol className="projects">
-              {projects.map((p, i) => (
-                <li className="project" key={p.title} data-project={i}>
-                  <div className="project-head">
-                    <h3>{p.title}</h3>
-                    <span className="project-status">{p.status}</span>
-                  </div>
-                  <p>
-                    <Stream text={p.body} />
-                  </p>
-                  <ul className="stack">
-                    {p.stack.map((s) => (
-                      <li key={s}>{s}</li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
+            {/* Five projects in a three-column grid leaves a hole. This fills
+                it with the work that was only ever a list of nouns anyway. */}
+            <li className="cell cell-quiet" data-rise>
+              <p>
+                Also: MediaWiki extensions in PHP and JavaScript, WordPress and React
+                builds for small businesses, and competitive programming in Python, C#
+                and Java.
+              </p>
+            </li>
+          </ol>
+        </Panel>
 
-        <section className="band" id="experience">
-          <h2 className="band-label">
-            <Stream text="Experience" />
-          </h2>
-          <div className="band-body">
-            <ol className="timeline">
-              {experience.map((e) => (
-                <li key={e.period + e.role}>
-                  <span className="period">{e.period}</span>
-                  <div>
-                    <h3>
-                      {e.role}
-                      <span className="org">{e.org}</span>
-                    </h3>
-                    <p>
-                      <Stream text={e.body} />
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
+        <Panel id="experience" index={3} label="Experience">
+          <ol className="cells cells-2">
+            {experience.map((e) => (
+              <li className="cell" key={e.period + e.role} data-rise>
+                <p className="cell-key">{e.period}</p>
+                <div className="cell-head">
+                  <h3>{e.role}</h3>
+                  <span className="org">{e.org}</span>
+                </div>
+                <p>{e.body}</p>
+              </li>
+            ))}
+          </ol>
+        </Panel>
 
-        <section className="band" id="education">
-          <h2 className="band-label">
-            <Stream text="Education" />
-          </h2>
-          <div className="band-body">
-            <ol className="timeline">
-              {education.map((e) => (
-                <li key={e.title}>
-                  <span className="period">{e.period}</span>
-                  <div>
-                    <h3>
-                      {e.title}
-                      <span className="org">{e.org}</span>
-                    </h3>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
+        <Panel id="education" index={4} label="Education">
+          <ol className="cells cells-3">
+            {education.map((e) => (
+              <li className="cell" key={e.title} data-rise>
+                <p className="cell-key">{e.period}</p>
+                <div className="cell-head">
+                  <h3>{e.title}</h3>
+                  <span className="org">{e.org}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </Panel>
 
-        <section className="band" id="skills">
-          <h2 className="band-label">
-            <Stream text="Skills" />
-          </h2>
-          <div className="band-body">
+        <Panel id="skills" index={5} label="Skills">
+          <ol className="cells cells-3">
             {skills.map((g) => (
-              <div className="skill-group" key={g.group}>
+              <li className="cell" key={g.group} data-rise>
                 <h3>{g.group}</h3>
                 <ul className="stack">
                   {g.items.map((s) => (
                     <li key={s}>{s}</li>
                   ))}
                 </ul>
-              </div>
+              </li>
             ))}
-            <div className="skill-group">
+            <li className="cell" data-rise>
               <h3>Languages</h3>
               <ul className="stack">
                 {languages.map((l) => (
@@ -410,28 +401,25 @@ export default function App() {
                   </li>
                 ))}
               </ul>
-            </div>
-          </div>
-        </section>
+            </li>
+          </ol>
+        </Panel>
 
-        <footer className="band contact" id="contact">
-          <h2 className="band-label">
-            <Stream text="Contact" />
-          </h2>
-          <div className="band-body">
-            <a className="mail" href={`mailto:${profile.links.email}`}>
-              {profile.links.email}
-            </a>
-            <nav className="hero-actions" aria-label="Contact links">
-              <Magnetic href={profile.links.cv} download>
-                Download CV
-              </Magnetic>
-              <a href={profile.links.github}>GitHub</a>
-              <a href={profile.links.linkedin}>LinkedIn</a>
-            </nav>
-            <p className="loc">{profile.location}</p>
-          </div>
-        </footer>
+        <Panel id="contact" index={6} label="Contact">
+          <a className="mail" href={`mailto:${profile.links.email}`} data-rise>
+            {profile.links.email}
+          </a>
+          <nav className="hero-actions" aria-label="Contact links" data-rise>
+            <Magnetic href={profile.links.cv} download>
+              Download CV
+            </Magnetic>
+            <a href={profile.links.github}>GitHub</a>
+            <a href={profile.links.linkedin}>LinkedIn</a>
+          </nav>
+          <p className="loc" data-rise>
+            {profile.location}
+          </p>
+        </Panel>
       </div>
     </div>
   )
