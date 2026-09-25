@@ -61,30 +61,60 @@ export const projects: Project[] = [
   },
 ]
 
-export const experience = [
+export type Role = {
+  title: string
+  period: string
+  body: string
+}
+
+export type Employer = {
+  org: string
+  /** The whole engagement, which is what the block is headed with. */
+  period: string
+  /** Absent where there is nothing to add beyond the span. */
+  meta?: string
+  /** Newest first. */
+  roles: Role[]
+}
+
+/**
+ * Grouped by employer rather than listed flat, so three promotions at one place
+ * read as three promotions at one place. The flat version repeated the company
+ * name three times and buried that.
+ */
+export const employment: Employer[] = [
   {
-    period: '11/2024 — present',
-    role: 'DevOps Engineer and Kubernetes Specialist',
     org: 'DVZ M-V GmbH',
-    body: 'Containerized microservices and CMS platforms on Kubernetes. Automation with Helm and CI/CD, monitoring with Prometheus and Grafana, and a Keycloak Helm chart for centralized single sign-on.',
+    period: '03/2024 — present',
+    meta: 'Rostock · 2.5+ years',
+    roles: [
+      {
+        title: 'DevOps Engineer and Kubernetes Specialist',
+        period: '11/2024 — present',
+        body: 'Containerized microservices and CMS platforms on Kubernetes. Automation with Helm and CI/CD, monitoring with Prometheus and Grafana, and a Keycloak Helm chart for centralized single sign-on.',
+      },
+      {
+        title: 'Working Student, Machine Learning',
+        period: '07/2024 — 11/2024',
+        body: 'Bachelor thesis project: AI search for geographic data using vector search, language models, and user classification.',
+      },
+      {
+        title: 'Software Development Intern, Full-Stack',
+        period: '03/2024 — 07/2024',
+        body: 'GIS web applications, OpenStreetMap API integration, PHP test coverage, and interactive frontend work.',
+      },
+    ],
   },
   {
-    period: '07/2024 — 11/2024',
-    role: 'Working Student, Machine Learning',
-    org: 'DVZ M-V GmbH',
-    body: 'Bachelor thesis project: AI search for geographic data using vector search, language models, and user classification.',
-  },
-  {
-    period: '03/2024 — 07/2024',
-    role: 'Software Development Intern, Full-Stack',
-    org: 'DVZ M-V GmbH',
-    body: 'GIS web applications, OpenStreetMap API integration, PHP test coverage, and interactive frontend work.',
-  },
-  {
-    period: '2021 — 2026',
-    role: 'Freelance AI and Full-Stack Developer',
     org: 'Self-employed',
-    body: 'Custom websites and applications for small businesses, plus AI integrations: document analysis, chatbots, and prompt pipelines.',
+    period: '2021 — 2026',
+    roles: [
+      {
+        title: 'Freelance AI and Full-Stack Developer',
+        period: '2021 — 2026',
+        body: 'Custom websites and applications for small businesses, plus AI integrations: document analysis, chatbots, and prompt pipelines.',
+      },
+    ],
   },
 ]
 

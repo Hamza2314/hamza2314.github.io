@@ -15,7 +15,7 @@ import {
   hydrateTuning,
   subscribe as subscribeTuning,
 } from './lib/heroTuning'
-import { profile, projects, experience, education, skills, languages } from './data'
+import { profile, projects, employment, education, skills, languages } from './data'
 
 // Design panel. Its own chunk, and only ever requested with ?tune in the URL,
 // so it costs an ordinary visitor nothing.
@@ -352,18 +352,39 @@ export default function App() {
         </Panel>
 
         <Panel id="experience" index={3} label="Experience">
-          <ol className="cells cells-2">
-            {experience.map((e) => (
-              <li className="cell" key={e.period + e.role} data-rise>
-                <p className="cell-key">{e.period}</p>
-                <div className="cell-head">
-                  <h3>{e.role}</h3>
-                  <span className="org">{e.org}</span>
-                </div>
-                <p>{e.body}</p>
-              </li>
+          <div className="employers">
+            {employment.map((emp) => (
+              <section className="employer" key={emp.org}>
+                <header className="employer-head" data-rise>
+                  <h3 className="employer-name">{emp.org}</h3>
+                  <span className="period">{emp.period}</span>
+                </header>
+
+                {emp.meta && (
+                  <p className="employer-meta" data-rise>
+                    {emp.meta}
+                  </p>
+                )}
+
+                <ol className="roles">
+                  {emp.roles.map((r) => (
+                    <li className="role" key={r.title} data-rise>
+                      <div className="role-head">
+                        <h4 className="role-title">{r.title}</h4>
+                        {/* A lone role spanning the whole engagement would
+                            print the same dates twice, once in the header and
+                            once here. */}
+                        {r.period !== emp.period && (
+                          <span className="period role-period">{r.period}</span>
+                        )}
+                      </div>
+                      <p>{r.body}</p>
+                    </li>
+                  ))}
+                </ol>
+              </section>
             ))}
-          </ol>
+          </div>
         </Panel>
 
         <Panel id="education" index={4} label="Education">
