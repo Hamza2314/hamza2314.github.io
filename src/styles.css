@@ -72,54 +72,6 @@ a {
   height: 100% !important;
 }
 
-/* ----------------------------------------------------------------- rail ---
-   Fixed section index. Functional wayfinding on a long CV page, not
-   decoration: it tells you where you are and how much is left.               */
-
-.rail {
-  position: fixed;
-  top: 50%;
-  left: clamp(18px, 3vw, 40px);
-  transform: translateY(-50%);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-}
-
-.rail a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  font-variation-settings: 'wdth' 85;
-  color: var(--ink-2);
-  opacity: 0.55;
-  transition: opacity 0.2s;
-}
-
-.rail a::before {
-  content: '';
-  width: 14px;
-  height: 1px;
-  background: currentColor;
-  transition: width 0.2s;
-}
-
-.rail a:hover,
-.rail a:focus-visible {
-  opacity: 1;
-}
-
-.rail a[aria-current='true'] {
-  opacity: 1;
-  color: var(--ink);
-}
-
-.rail a[aria-current='true']::before {
-  width: 26px;
-}
-
 /* ---------------------------------------------------------------- shell --- */
 
 .shell {
@@ -127,7 +79,7 @@ a {
   z-index: 1;
   max-width: 1320px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 5vw, 56px) 0 calc(var(--rail) + clamp(20px, 4vw, 48px));
+  padding: 0 clamp(20px, 5vw, 56px);
 }
 
 .col {
@@ -614,14 +566,6 @@ a {
 /* ------------------------------------------------------------ responsive --- */
 
 @media (max-width: 1080px) {
-  .rail {
-    display: none;
-  }
-
-  .shell {
-    padding-left: clamp(20px, 5vw, 56px);
-  }
-
   .band {
     grid-template-columns: 116px minmax(0, 1fr);
     gap: 0 28px;
@@ -889,8 +833,6 @@ a {
     opacity: 1;
   }
 
-  .rail a,
-  .rail a::before,
   .magnetic-hit,
   .mail,
   .hero-actions > a {

@@ -5,9 +5,10 @@ export const profile = {
   intro:
     'I build production AI systems and the infrastructure that runs them. Currently managing Kubernetes microservices at DVZ M-V while developing LLM-based applications.',
   about: [
-    'Computer scientist working at the point where machine learning meets production infrastructure. My work runs from vector search and retrieval pipelines to Helm charts and CI/CD.',
-    'I completed my Bachelor\u2019s at the University of Rostock with a thesis on AI-powered geographic search, graded 1.8, and I am finishing my Master\u2019s while working at DVZ M-V.',
-    'I work in German, English and Arabic.',
+    'I build AI systems and the infrastructure they run on. At DVZ M-V that means containerised microservices on Kubernetes: Helm charts, CI/CD, Prometheus and Grafana, and a Keycloak deployment that gave the department single sign-on across its services.',
+    'My Bachelor\u2019s thesis built an AI search system for a geographic information platform, pairing vector search with a classifier that tells a beginner from an expert and adapts the results to match. It was graded 1.8. My Master\u2019s thesis, also with DVZ M-V, asks how much context a self-hosted coding agent actually needs when it cannot have all of it.',
+    'The rest of what I know came from shipping things end to end. Excessus turns a prospective client\u2019s description of their own situation into something a German law firm can act on \u2014 built solo, from the retrieval architecture through to the cold outreach that found the first firms.',
+    'I work in German, English and Arabic, and I am looking for an AI engineering role in Munich.',
   ],
   links: {
     email: 'hamza1133@live.com',

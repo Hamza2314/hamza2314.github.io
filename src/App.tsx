@@ -25,15 +25,6 @@ gsap.registerPlugin(ScrollTrigger)
 /** Marks that the bands have already generated once in this tab. */
 const STREAM_KEY = 'bands-streamed'
 
-const SECTIONS = [
-  { id: 'about', label: 'About' },
-  { id: 'work', label: 'Work' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'education', label: 'Education' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'contact', label: 'Contact' },
-]
-
 /** Words rise from a clipped mask. The stagger is driven by GSAP, not CSS. */
 function SplitHeading({ text, className }: { text: string; className?: string }) {
   return (
@@ -52,7 +43,6 @@ export default function App() {
   const hero = useRef<HTMLElement>(null)
   const figure = useRef<HTMLDivElement>(null)
   const glow = useRef<HTMLDivElement>(null)
-  const [active, setActive] = useState<string>('')
 
   // Stored tuning is applied after mount, never during render, so the
   // prerendered markup and the first client render always agree.
@@ -261,22 +251,6 @@ export default function App() {
         }
       }
 
-      // ScrollTrigger drives the rail's current-section state. It is
-      // wayfinding, not decoration, which is why it survives reduced motion
-      // while the old blanket fade-and-rise on every section did not.
-      for (const { id } of SECTIONS) {
-        const el = document.getElementById(id)
-        if (!el) continue
-
-        ScrollTrigger.create({
-          trigger: el,
-          start: 'top 45%',
-          end: 'bottom 45%',
-          onToggle: (self) => {
-            if (self.isActive) setActive(id)
-          },
-        })
-      }
     }, root)
 
     return () => {
@@ -296,14 +270,6 @@ export default function App() {
           <HeroTuner />
         </Suspense>
       )}
-
-      <nav className="rail" aria-label="Sections">
-        {SECTIONS.map((s) => (
-          <a key={s.id} href={`#${s.id}`} aria-current={active === s.id ? 'true' : undefined}>
-            {s.label}
-          </a>
-        ))}
-      </nav>
 
       <header className="hero" id="top" ref={hero}>
         <ParticleField />

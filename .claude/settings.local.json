@@ -50,7 +50,8 @@
       "PowerShell(git commit -q -F \"C:\\\\Users\\\\MasriH\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Basisordner-MasriH-DVZNT1-Profil-Desktop-portfolio\\\\bb9ce255-78f8-4f2d-bea7-cef14a89f296\\\\scratchpad\\\\msg.txt\")",
       "PowerShell(try { $r = Invoke-WebRequest -Uri 'http://localhost:4173/HamzaMasri_CV.pdf' -UseBasicParsing -TimeoutSec 10; Write-Output \\(\"CV link -> \" + $r.StatusCode + \"  type=\" + $r.Headers['Content-Type']\\) } catch { Write-Output \\(\"CV link -> FAILED: \" + $_.Exception.Message\\) })",
       "PowerShell(node scripts/build-circle-placeholders.mjs --preview)",
-      "PowerShell(git commit -q -F \"C:\\\\Users\\\\MasriH\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Basisordner-MasriH-DVZNT1-Profil-Desktop-portfolio\\\\bb9ce255-78f8-4f2d-bea7-cef14a89f296\\\\scratchpad\\\\msg2.txt\")"
+      "PowerShell(git commit -q -F \"C:\\\\Users\\\\MasriH\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Basisordner-MasriH-DVZNT1-Profil-Desktop-portfolio\\\\bb9ce255-78f8-4f2d-bea7-cef14a89f296\\\\scratchpad\\\\msg2.txt\")",
+      "PowerShell(git commit -q -m \"Content: drop the left section rail, rewrite About from the CV\")"
     ]
   }
 }
