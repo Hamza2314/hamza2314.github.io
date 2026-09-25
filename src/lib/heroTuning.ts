@@ -77,6 +77,10 @@ export type Tuning = {
   // motion
   parallax: number
   entrance: boolean
+
+  // band streaming
+  streamOn: boolean
+  streamSpeed: number
 }
 
 export const DEFAULTS: Tuning = {
@@ -141,6 +145,12 @@ export const DEFAULTS: Tuning = {
   // half a viewport reads as the thing falling off the page.
   parallax: 0.18,
   entrance: true,
+
+  // Words per second. Fast enough that a reader never waits on it: a 45-word
+  // paragraph lands in well under two seconds. A character typewriter at a
+  // readable rate would take five times that.
+  streamOn: true,
+  streamSpeed: 36,
 }
 
 /**
@@ -162,6 +172,7 @@ const CANVAS_KEYS = [
   'brushSize',
   'idleDelay',
   'resolveTime',
+  'streamSpeed',
 ] as const
 
 /** Knob -> CSS custom property. Anything absent here is not a CSS value. */

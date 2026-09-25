@@ -135,6 +135,13 @@ const GROUPS: Group[] = [
       { kind: 'toggle', key: 'entrance', label: 'Entrance animation' },
     ],
   },
+  {
+    title: 'Band streaming',
+    controls: [
+      { kind: 'toggle', key: 'streamOn', label: 'Stream the bands in' },
+      { kind: 'range', key: 'streamSpeed', label: 'Speed', min: 8, max: 120, step: 2, unit: ' words/s' },
+    ],
+  },
 ]
 
 function Row({ control, value }: { control: Control; value: Tuning[keyof Tuning] }) {

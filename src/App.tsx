@@ -6,6 +6,7 @@ import Scene from './components/Scene'
 import Magnetic from './components/Magnetic'
 import ParticleField from './components/ParticleField'
 import HeroBeam from './components/HeroBeam'
+import Stream from './components/Stream'
 import ScratchPortrait from './components/ScratchPortrait'
 import {
   getServerTuning,
@@ -20,6 +21,9 @@ import { profile, projects, experience, education, skills, languages } from './d
 const HeroTuner = lazy(() => import('./components/HeroTuner'))
 
 gsap.registerPlugin(ScrollTrigger)
+
+/** Marks that the bands have already generated once in this tab. */
+const STREAM_KEY = 'bands-streamed'
 
 const SECTIONS = [
   { id: 'about', label: 'About' },
@@ -168,6 +172,95 @@ export default function App() {
         })
       }
 
+      // --- band streaming ---
+      // Each band generates itself when it is first scrolled to. The words are
+      // already in the DOM; all that moves is opacity and which word the caret
+      // is sitting after.
+      const blocks = Array.from(root.current?.querySelectorAll('.stream') ?? [])
+
+      // Once per tab, so a visitor reading back up the page is not made to wait
+      // again. `?tune` opts out of that, because iterating on an effect you can
+      // only see once per session is miserable.
+      const tuning = new URLSearchParams(window.location.search).has('tune')
+      const alreadyRan = !tuning && sessionStorage.getItem(STREAM_KEY) === '1'
+
+      if (reduced || alreadyRan || !getTuning().streamOn) {
+        for (const block of blocks) {
+          for (const word of block.querySelectorAll('.stream-w')) {
+            word.classList.add('is-on')
+          }
+        }
+      } else {
+        // Blocks sharing a [data-stream] ancestor generate one after another,
+        // so there is only ever one caret on screen. Without this the three
+        // About paragraphs run in parallel and the page appears to have three
+        // cursors, which is not what streaming looks like.
+        const groups = new Map<Element, Element[]>()
+        for (const block of blocks) {
+          const key = block.closest('[data-stream]') ?? block
+          const list = groups.get(key)
+          if (list) list.push(block)
+          else groups.set(key, [block])
+        }
+
+        for (const [key, list] of groups) {
+          ScrollTrigger.create({
+            trigger: key,
+            start: 'top 88%',
+            once: true,
+            onEnter: () => {
+              const speed = getTuning().streamSpeed
+              const tl = gsap.timeline()
+
+              for (const block of list) {
+                const words = Array.from(block.querySelectorAll<HTMLElement>('.stream-w'))
+                if (!words.length) continue
+
+                // One tween of a counter rather than one tween per word: a long
+                // band is a couple of hundred words, and they only ever need a
+                // class adding in order.
+                const state = { i: 0 }
+                let shown = 0
+                let caret: HTMLElement | null = null
+
+                tl.to(
+                  state,
+                  {
+                    i: words.length,
+                    duration: words.length / speed,
+                    ease: 'none',
+                    onUpdate: () => {
+                      const upTo = Math.min(words.length, Math.floor(state.i) + 1)
+                      while (shown < upTo) words[shown++].classList.add('is-on')
+
+                      const head = words[shown - 1]
+                      if (head && head !== caret) {
+                        caret?.classList.remove('is-cursor')
+                        head.classList.add('is-cursor')
+                        caret = head
+                      }
+                    },
+                    onComplete: () => {
+                      for (const word of words) word.classList.add('is-on')
+                      caret?.classList.remove('is-cursor')
+                    },
+                  },
+                  // A beat between blocks, which is what reads as a paragraph
+                  // break rather than one long run of text.
+                  '>0.14',
+                )
+              }
+            },
+          })
+        }
+
+        try {
+          sessionStorage.setItem(STREAM_KEY, '1')
+        } catch {
+          // Private mode. The effect simply plays on every load.
+        }
+      }
+
       // ScrollTrigger drives the rail's current-section state. It is
       // wayfinding, not decoration, which is why it survives reduced motion
       // while the old blanket fade-and-rise on every section did not.
@@ -242,16 +335,24 @@ export default function App() {
 
       <div className="shell">
         <section className="band" id="about">
-          <h2 className="band-label">About</h2>
-          <div className="band-body prose">
+          <h2 className="band-label">
+            <Stream text="About" />
+          </h2>
+          {/* data-stream chains these paragraphs into one sequence, so the
+              caret moves through them in order rather than three at once. */}
+          <div className="band-body prose" data-stream>
             {profile.about.map((p, i) => (
-              <p key={i}>{p}</p>
+              <p key={i}>
+                <Stream text={p} />
+              </p>
             ))}
           </div>
         </section>
 
         <section className="band" id="work">
-          <h2 className="band-label">Selected work</h2>
+          <h2 className="band-label">
+            <Stream text="Selected work" />
+          </h2>
           <div className="band-body">
             <ol className="projects">
               {projects.map((p, i) => (
@@ -260,7 +361,9 @@ export default function App() {
                     <h3>{p.title}</h3>
                     <span className="project-status">{p.status}</span>
                   </div>
-                  <p>{p.body}</p>
+                  <p>
+                    <Stream text={p.body} />
+                  </p>
                   <ul className="stack">
                     {p.stack.map((s) => (
                       <li key={s}>{s}</li>
@@ -273,7 +376,9 @@ export default function App() {
         </section>
 
         <section className="band" id="experience">
-          <h2 className="band-label">Experience</h2>
+          <h2 className="band-label">
+            <Stream text="Experience" />
+          </h2>
           <div className="band-body">
             <ol className="timeline">
               {experience.map((e) => (
@@ -284,7 +389,9 @@ export default function App() {
                       {e.role}
                       <span className="org">{e.org}</span>
                     </h3>
-                    <p>{e.body}</p>
+                    <p>
+                      <Stream text={e.body} />
+                    </p>
                   </div>
                 </li>
               ))}
@@ -293,7 +400,9 @@ export default function App() {
         </section>
 
         <section className="band" id="education">
-          <h2 className="band-label">Education</h2>
+          <h2 className="band-label">
+            <Stream text="Education" />
+          </h2>
           <div className="band-body">
             <ol className="timeline">
               {education.map((e) => (
@@ -312,7 +421,9 @@ export default function App() {
         </section>
 
         <section className="band" id="skills">
-          <h2 className="band-label">Skills</h2>
+          <h2 className="band-label">
+            <Stream text="Skills" />
+          </h2>
           <div className="band-body">
             {skills.map((g) => (
               <div className="skill-group" key={g.group}>
@@ -338,7 +449,9 @@ export default function App() {
         </section>
 
         <footer className="band contact" id="contact">
-          <h2 className="band-label">Contact</h2>
+          <h2 className="band-label">
+            <Stream text="Contact" />
+          </h2>
           <div className="band-body">
             <a className="mail" href={`mailto:${profile.links.email}`}>
               {profile.links.email}

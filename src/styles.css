@@ -369,6 +369,42 @@ a {
   border-color: var(--signal);
 }
 
+/* ---------------------------------------------------------------- stream ---
+   Every band generates itself as it is scrolled to: the label, then the prose,
+   word by word with a caret riding the end.
+
+   Only opacity moves. The words are all present in the markup, so this rule is
+   gated on .js for the same reason the hero's is: without scripting there is
+   nothing to finish the reveal, and the page must not ship invisible text.    */
+
+.js .stream-w {
+  opacity: 0;
+  transition: opacity 0.2s linear;
+}
+
+.js .stream-w.is-on {
+  opacity: 1;
+}
+
+/* Sits between the word and the space that follows it, so it never drifts away
+   from the text as the line wraps. */
+.stream-w.is-cursor::after {
+  content: '';
+  display: inline-block;
+  width: 0.46em;
+  height: 1em;
+  margin-left: 0.14em;
+  vertical-align: -0.14em;
+  background: var(--accent);
+  animation: caret 0.9s steps(1) infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
 /* -------------------------------------------------------------- magnetic --- */
 
 .magnetic {
@@ -859,6 +895,16 @@ a {
   .mail,
   .hero-actions > a {
     transition: none;
+  }
+
+  /* Every band arrives already generated, and nothing blinks. */
+  .js .stream-w {
+    opacity: 1;
+    transition: none;
+  }
+
+  .stream-w.is-cursor::after {
+    display: none;
   }
 
   * {
