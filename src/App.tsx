@@ -344,7 +344,7 @@ export default function App() {
             <li className="cell cell-quiet" data-rise>
               <p>
                 Also: MediaWiki extensions in PHP and JavaScript, WordPress and React
-                builds for small businesses, and competitive programming in Python, C#
+                builds for small businesses, and competitive programming in Python, C#,
                 and Java.
               </p>
             </li>
@@ -375,6 +375,10 @@ export default function App() {
                   <h3>{e.title}</h3>
                   <span className="org">{e.org}</span>
                 </div>
+                {/* Same markup an Experience cell already uses for its body, so
+                    this adds copy rather than a layout. Absent on the German
+                    course, which has nothing to add beyond its title. */}
+                {e.body && <p>{e.body}</p>}
               </li>
             ))}
           </ol>

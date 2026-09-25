@@ -2,13 +2,12 @@ export const profile = {
   name: 'Hamza Masri',
   role: 'AI Engineer and DevOps Specialist',
   location: 'Rostock, Germany',
-  intro:
-    'I build production AI systems and the infrastructure that runs them. Currently managing Kubernetes microservices at DVZ M-V while developing LLM-based applications.',
+  intro: 'Building production AI systems and the infrastructure they run on.',
   about: [
-    'I build AI systems and the infrastructure they run on. At DVZ M-V that means containerised microservices on Kubernetes: Helm charts, CI/CD, Prometheus and Grafana, and a Keycloak deployment that gave the department single sign-on across its services.',
-    'My Bachelor\u2019s thesis built an AI search system for a geographic information platform, pairing vector search with a classifier that tells a beginner from an expert and adapts the results to match. It was graded 1.8. My Master\u2019s thesis, also with DVZ M-V, asks how much context a self-hosted coding agent actually needs when it cannot have all of it.',
-    'The rest of what I know came from shipping things end to end. Excessus turns a prospective client\u2019s description of their own situation into something a German law firm can act on \u2014 built solo, from the retrieval architecture through to the cold outreach that found the first firms.',
-    'I work in German, English and Arabic, and I am looking for an AI engineering role in Munich.',
+    'DevOps Engineer and AI Developer with 2.5+ years of professional experience at DVZ M-V GmbH, currently writing my Master\u2019s thesis in Computer Science at the University of Rostock. Built and shipped multiple products end-to-end alongside my professional role.',
+    'Strong in both practice and theory. On the infrastructure side: Kubernetes, Helm, CI/CD, and monitoring with Prometheus and Grafana, including a Keycloak deployment that gave the department single sign-on across its services. On the AI side: LLM integration, retrieval, prompt engineering, and AI automation.',
+    'Both theses focus on AI. The Bachelor\u2019s thesis built an AI search system for geographic data, combining vector search with a classifier that tells beginners from experts and adapts results to match. The Master\u2019s thesis studies how much context a self-hosted coding agent needs when it can\u2019t have all of it.',
+    'Working languages: German, English, and Arabic. Open to full-time AI engineering roles.',
   ],
   links: {
     email: 'hamza1133@live.com',
@@ -32,32 +31,32 @@ export type Project = {
 export const projects: Project[] = [
   {
     title: 'Excessus',
-    status: 'Own venture',
-    body: 'Turns a prospective client’s own account of their situation into a brief a German law firm can act on. Built solo, architecture through to the outreach that found the first firms.',
+    status: 'Own venture, prototype',
+    body: 'AI client intake for German law firms. Turns a prospective client’s own description of their situation into a structured brief a lawyer can act on. Built solo, from the RAG architecture to cold outreach to law firms.',
     stack: ['Claude API', 'RAG', 'Python', 'Vector search'],
   },
   {
     title: 'Phantom',
     status: 'Prototype',
-    body: 'Browser automation across isolated account profiles. A selector health system repairs DOM selectors as target sites change, so automations degrade visibly instead of failing silently.',
+    body: 'Browser automation across isolated account profiles. A selector health system detects and repairs broken DOM selectors as target sites change, so failures surface instead of passing silently.',
     stack: ['TypeScript', 'Electron', 'SQLite', 'Playwright'],
   },
   {
     title: 'Geographic AI search',
-    status: 'Bachelor thesis, 1.8',
-    body: 'Vector search paired with a classifier that tells a beginner from an expert and adapts the results to match. Built at DVZ M-V.',
+    status: 'Bachelor thesis, grade 1.8',
+    body: 'Vector search and language models for geographic information retrieval, plus a classifier that distinguishes beginners from experts and personalizes results. Built at DVZ M-V.',
     stack: ['Python', 'PyTorch', 'OpenAI', 'PHP'],
   },
   {
     title: 'Content pipeline',
     status: 'Freelance',
-    body: 'Outline, draft, legal review, SEO rework, final pass — five stages, each its own prompt with its own validation, over streaming Claude calls.',
+    body: 'Five-stage LLM pipeline for specialized legal texts: outline, generation, legal review, SEO rework, final pass. Each stage has its own prompt and validation, running on streaming Claude API calls. Delivered with frontend and technical documentation.',
     stack: ['Claude API', 'Python', 'Prompt engineering'],
   },
   {
     title: 'Email manager',
-    status: 'Freelance',
-    body: 'Classifies and prioritises German email by semantic content, and drafts replies matched to the tone of the original.',
+    status: 'Personal project',
+    body: 'Classifies and prioritizes German emails by semantic content and urgency, and drafts replies matched to the tone of the original.',
     stack: ['Python', 'LLM API', 'React', 'PostgreSQL'],
   },
 ]
@@ -67,32 +66,54 @@ export const experience = [
     period: '11/2024 — present',
     role: 'DevOps Engineer and Kubernetes Specialist',
     org: 'DVZ M-V GmbH',
-    body: 'Containerised microservices and CMS platforms. Automation with Helm and CI/CD, monitoring with Prometheus and Grafana.',
+    body: 'Containerized microservices and CMS platforms on Kubernetes. Automation with Helm and CI/CD, monitoring with Prometheus and Grafana, and a Keycloak Helm chart for centralized single sign-on.',
   },
   {
     period: '07/2024 — 11/2024',
     role: 'Working Student, Machine Learning',
     org: 'DVZ M-V GmbH',
-    body: 'Bachelor thesis project. AI search and user classification for geographic data.',
+    body: 'Bachelor thesis project: AI search for geographic data using vector search, language models, and user classification.',
   },
   {
     period: '03/2024 — 07/2024',
     role: 'Software Development Intern, Full-Stack',
     org: 'DVZ M-V GmbH',
-    body: 'GIS web applications, OpenStreetMap API integration, PHP test coverage.',
+    body: 'GIS web applications, OpenStreetMap API integration, PHP test coverage, and interactive frontend work.',
   },
   {
-    period: '2021 — present',
+    period: '2021 — 2026',
     role: 'Freelance AI and Full-Stack Developer',
     org: 'Self-employed',
-    body: 'Custom applications and AI integrations for small businesses: document analysis, chatbots, prompt pipelines.',
+    body: 'Custom websites and applications for small businesses, plus AI integrations: document analysis, chatbots, and prompt pipelines.',
   },
 ]
 
-export const education = [
-  { period: 'in progress', title: 'M.Sc. Computer Science', org: 'University of Rostock' },
-  { period: '2020 — 2024', title: 'B.Sc. Computer Science, final grade 1.8', org: 'University of Rostock' },
-  { period: '2018 — 2019', title: 'Intensive German A1 to B2, final grade 1.3', org: 'Rostock' },
+export type Education = {
+  period: string
+  title: string
+  org: string
+  /** Absent where there is nothing to add beyond the title. */
+  body?: string
+}
+
+export const education: Education[] = [
+  {
+    period: '2024 — 2027 (expected)',
+    title: 'M.Sc. Computer Science',
+    org: 'University of Rostock',
+    body: 'Master’s thesis: Context Provisioning for Self-Hosted Coding Agents under Resource Constraints: A Controlled Experimental Study.',
+  },
+  {
+    period: '2020 — 2024',
+    title: 'B.Sc. Computer Science, final grade 1.8',
+    org: 'University of Rostock',
+    body: 'Focus areas: AI systems, software development, databases, algorithms, and data security.',
+  },
+  {
+    period: '2018 — 2019',
+    title: 'Intensive German A1 to B2, final grade 1.3',
+    org: 'Rostock',
+  },
 ]
 
 export const skills = [
