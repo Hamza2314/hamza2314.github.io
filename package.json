@@ -7,6 +7,7 @@
     "dev": "vite",
     "build:hero": "node scripts/build-hero-image.mjs",
     "build:circle": "node scripts/build-circle-photos.mjs",
+    "build:circle-placeholder": "node scripts/build-circle-placeholders.mjs",
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node prerender.js",
     "preview": "vite preview"
   },

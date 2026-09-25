@@ -219,7 +219,10 @@ export default function App() {
 
         <div className="hero-inner">
           <div className="hero-figure" ref={figure}>
-            <ScratchPortrait alt={`${heroName}, ${heroRole}`} />
+            {/* Numbered stand-ins are in public/ for now, so the alt text
+                describes those and not a portrait that is not there. Put the
+                name back when `npm run build:circle` replaces them. */}
+            <ScratchPortrait alt="Portrait placeholder" />
           </div>
 
           <div className="hero-text">

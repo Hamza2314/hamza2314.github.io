@@ -8,6 +8,10 @@
  * the same place in every square. The boxes below are tuned by eye against the
  * circular previews this script can emit.
  *
+ * Writes the same filenames as build-circle-placeholders.mjs, which is what
+ * makes the two interchangeable. Running this one replaces the numbered cards;
+ * the alt text in App.tsx has to go back to the name at the same time.
+ *
  * Run: npm run build:circle          (add --preview to write the proof sheet)
  */
 import { mkdirSync, statSync } from 'node:fs'
