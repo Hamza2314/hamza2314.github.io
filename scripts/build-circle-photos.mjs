@@ -34,26 +34,23 @@ const WIDTHS = [200, 400, 600]
  * Hold those and a half-scratched circle reads as one face becoming another.
  * Miss them and it reads as a rendering fault.
  *
- *   Photo4.png          3375 x 4219   cutout, head top y 642, head ~430 wide
- *   PhotoProfile2.jpeg  1536 x 2048   original frame, restaurant behind
- *   PersonalPhoto.png   1149 x 2937   cutout, head hard against the top edge
+ *   Pics/Nature.jpeg    1024 x 1024   forest behind
+ *   Pics/Office.jpeg    1024 x 1024   office behind
+ *   Pics/Sea.jpeg       1024 x 1024   beach behind
+ *
+ * The three were shot as a set: same pose, same framing, head already in the
+ * same place in every frame. The whole square is used as-is, since there is no
+ * room above the hair to hit the ratios above without cropping the curls.
  *
  * `padTop` buys room above a head the source has no room above. It is only
- * safe on the cutouts, where the added pixels flatten to exactly the same
- * ground as the transparent ones already around the subject.
+ * safe on cutouts, where the added pixels flatten to exactly the same ground
+ * as the transparent ones already around the subject.
  */
+const FULL = { left: 0, top: 0, width: 1024, height: 1024 }
 const PHOTOS = [
-  { name: 'circle-1', src: 'assets/Photo4.png', box: { left: 875, top: 391, width: 1450, height: 1450 } },
-  { name: 'circle-2', src: 'assets/PhotoProfile2.jpeg', box: { left: 342, top: 186, width: 760, height: 760 } },
-  {
-    name: 'circle-3',
-    src: 'assets/PersonalPhoto.png',
-    // Silhouette scan: hair starts at y 13, neck narrows at y 524, shoulders
-    // flare through y 743. A 1133 box on those ratios wants to start 157px
-    // above the frame, so the top is padded first.
-    padTop: 200,
-    box: { left: 0, top: 43, width: 1133, height: 1133 },
-  },
+  { name: 'circle-1', src: 'Pics/Office.jpeg', box: FULL },
+  { name: 'circle-2', src: 'Pics/Nature.jpeg', box: FULL },
+  { name: 'circle-3', src: 'Pics/Sea.jpeg', box: FULL },
 ]
 
 const preview = process.argv.includes('--preview')

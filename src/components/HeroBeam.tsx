@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getTuning, subscribe as subscribeTuning } from '../lib/heroTuning'
+import { getLight, subscribeLight } from '../lib/heroLight'
 
 /**
  * A shaft of light entering from above.
@@ -24,15 +25,15 @@ import { getTuning, subscribe as subscribeTuning } from '../lib/heroTuning'
  * CSS stretches the result. The buffer is otherwise kept small on purpose: the
  * falloffs are low frequency and survive the upscale, and the grain wants
  * softening rather than resolving.
+ *
+ * The colour is not baked in. The shape is painted once in white and tinted
+ * with the light from lib/heroLight, which follows the portrait's photo.
  */
 
 /** Buffer height. Width follows the hero's aspect, within these bounds. */
 const BUFFER_H = 600
 const MIN_W = 200
 const MAX_W = 1200
-
-/** Cool silver, matching the ambient wash it sits in. */
-const RGB = [200, 205, 212]
 
 export default function HeroBeam() {
   const host = useRef<HTMLDivElement>(null)
@@ -49,16 +50,37 @@ export default function HeroBeam() {
     if (!el || !box) return
 
     const ctx = el.getContext('2d')
-    if (!ctx) return
+    // The shaft's shape, painted in white. Colour is applied on top of it, so
+    // a change of colour is one fill and one draw rather than a repaint of
+    // every pixel, which is what lets the colour ease smoothly at all.
+    const shape = document.createElement('canvas')
+    const shapeCtx = shape.getContext('2d')
+    if (!ctx || !shapeCtx) return
 
+    const hero = box.parentElement
     let width = 0
+
+    /** The shape, filled with the light's current colour. */
+    const tint = () => {
+      if (!width) return
+      const [r, g, b] = getLight()
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.clearRect(0, 0, width, BUFFER_H)
+      ctx.fillStyle = `rgb(${r}, ${g}, ${b})`
+      ctx.fillRect(0, 0, width, BUFFER_H)
+      ctx.globalCompositeOperation = 'destination-in'
+      ctx.drawImage(shape, 0, 0)
+      ctx.globalCompositeOperation = 'source-over'
+      // The ambient wash in .hero-glow reads this, so it moves in step.
+      hero?.style.setProperty('--light-rgb', `${r}, ${g}, ${b}`)
+    }
 
     const paint = () => {
       if (!width) return
 
       const { beamTop, beamAngle, beamHeight, beamStrength, beamGrain } = getTuning()
 
-      const img = ctx.createImageData(width, BUFFER_H)
+      const img = shapeCtx.createImageData(width, BUFFER_H)
       const data = img.data
 
       const cx = width / 2
@@ -94,14 +116,15 @@ export default function HeroBeam() {
           const a = beamStrength * vf * hf * grain
 
           const i = (y * width + x) * 4
-          data[i] = RGB[0]
-          data[i + 1] = RGB[1]
-          data[i + 2] = RGB[2]
+          data[i] = 255
+          data[i + 1] = 255
+          data[i + 2] = 255
           data[i + 3] = Math.round(a * 255)
         }
       }
 
-      ctx.putImageData(img, 0, 0)
+      shapeCtx.putImageData(img, 0, 0)
+      tint()
     }
 
     const resize = () => {
@@ -113,8 +136,10 @@ export default function HeroBeam() {
       if (next === width) return
 
       width = next
-      el.width = width
-      el.height = BUFFER_H
+      for (const c of [el, shape]) {
+        c.width = width
+        c.height = BUFFER_H
+      }
       paint()
     }
 
@@ -123,9 +148,11 @@ export default function HeroBeam() {
     resize()
 
     const unsubscribe = subscribeTuning(paint)
+    const unsubscribeLight = subscribeLight(tint)
     return () => {
       ro.disconnect()
       unsubscribe()
+      unsubscribeLight()
     }
   }, [mounted])
 

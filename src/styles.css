@@ -20,6 +20,11 @@
   --rail: 132px;
   --measure: 68ch;
 
+  /* The shell's side padding, and where its content edge falls on a screen
+     wider than the shell. Full-bleed rows line their first item up with it. */
+  --gutter: clamp(20px, 5vw, 56px);
+  --edge: max(var(--gutter), calc((100vw - 1320px) / 2 + var(--gutter)));
+
   /* Older names the sections below the hero are written against. Aliased
      rather than renamed so this pass does not edit rules outside the hero. */
   --ink: var(--text);
@@ -33,6 +38,9 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Full-bleed rows are sized off 100vw, which includes the scrollbar. Clip
+     rather than hidden, so nothing here becomes a scroll container. */
+  overflow-x: clip;
 }
 
 body {
@@ -144,7 +152,8 @@ a {
    the whole way out instead of stepping partway down.
 
    Unlike the gradient this is modelled on, it drifts: --gx and --gy are
-   written by the pointer loop in App.                                        */
+   written by the pointer loop in App. And it takes the beam's colour, which
+   follows the portrait: --light-rgb is written by HeroBeam.                  */
 
 .hero-glow {
   position: absolute;
@@ -155,8 +164,8 @@ a {
     ellipse var(--h-glow-rx, 80%) var(--h-glow-ry, 50%) at
       calc(var(--h-glow-x, 50%) + var(--gx, 0vw))
       calc(var(--h-glow-y, 20%) + var(--gy, 0vh)),
-    rgba(200, 205, 212, var(--h-glow-a, 0.05)) 0%,
-    rgba(200, 205, 212, 0) 70%
+    rgba(var(--light-rgb, 200, 205, 212), var(--h-glow-a, 0.05)) 0%,
+    rgba(var(--light-rgb, 200, 205, 212), 0) 70%
   );
 }
 
@@ -402,6 +411,12 @@ a {
   border-top: 1px solid var(--rule);
 }
 
+/* A grid item defaults to min-width: auto, so anything wider than the screen
+   inside it (the timeline's row, say) would widen the whole panel to fit. */
+.panel-inner {
+  min-width: 0;
+}
+
 .panel-label {
   display: flex;
   align-items: baseline;
@@ -490,7 +505,6 @@ a {
   margin: 0;
 }
 
-.project-status,
 .period,
 .org,
 .lvl {
@@ -653,6 +667,615 @@ a {
   max-width: var(--measure);
 }
 
+/* --- projects showcase ---
+   One project centred in front, a neighbour either side, smaller, dimmed and
+   slightly blurred, dissolving into the screen edges.
+
+   The base rules are the native mode: a snapping horizontal row with the photo
+   above the card, which is what a phone gets and what ships in the HTML.
+   `.is-stage` is added by script on a wide screen and turns every slide into
+   an absolutely placed layer that the script positions. See Showcase.tsx.
+
+   Every size lives here. The script only reads them back off the first slide. */
+
+.showcase {
+  --card-w: clamp(290px, 24vw, 370px);
+  /* As wide as the screen allows, and never so tall that the panel outgrows a
+     laptop screen: the second term caps width by height at 4:3. That keeps
+     the whole showcase on screen at once, which is when the wheel steps it. */
+  --photo-w: clamp(420px, min(44vw, calc((100svh - 330px) * 1.3333)), 700px);
+  /* How far the card stands out to the left of the photo it overlaps. */
+  --hang: calc(var(--card-w) * 0.6);
+}
+
+/* -- head -- */
+
+.showcase-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 clamp(24px, 4.4vh, 44px);
+}
+
+.showcase-count {
+  margin: 0;
+  display: flex;
+  gap: 7px;
+  font-size: 13px;
+  font-variation-settings: 'wdth' 85;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+  color: var(--ink-2);
+}
+
+.showcase-count-now {
+  color: var(--ink);
+}
+
+.showcase-count-sep {
+  opacity: 0.5;
+}
+
+.showcase-progress {
+  position: relative;
+  width: clamp(90px, 12vw, 180px);
+  height: 1px;
+  background: var(--rule);
+}
+
+.showcase-progress span {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.showcase-nav {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.showcase-nav button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.showcase-nav button:hover,
+.showcase-nav button:focus-visible {
+  border-color: var(--ink-2);
+  background: var(--surface);
+}
+
+/* Nothing further that way. Still focusable, so a keyboard reader pressing
+   it at the end is not thrown back to the top of the page. */
+.showcase-nav button[aria-disabled='true'] {
+  opacity: 0.3;
+  cursor: default;
+  border-color: var(--rule);
+  background: none;
+}
+
+.showcase-nav svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* -- viewport --
+   Full bleed, so slides arrive from the window's edge rather than the shell's.
+   The stage's own padding puts the first one back on the content edge.       */
+
+.showcase-viewport {
+  margin-inline: calc(50% - 50vw);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--edge);
+  scrollbar-width: none;
+}
+
+.showcase-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.showcase-viewport:focus-visible {
+  outline-offset: -2px;
+}
+
+.showcase-stage {
+  display: flex;
+  gap: 18px;
+  width: max-content;
+  padding: 0 var(--edge) 4px;
+}
+
+/* -- slide, native: photo on top, card overlapping its lower edge -- */
+
+.slide {
+  position: relative;
+  flex: none;
+  width: min(84vw, 440px);
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+}
+
+.slide-media {
+  position: relative;
+  order: -1;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  cursor: zoom-in;
+}
+
+.slide-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* An app's header and navigation live at the top: crop from below. */
+  object-position: center top;
+  transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.slide-media:hover img,
+.slide-media:focus-visible img {
+  transform: scale(1.035);
+}
+
+.slide-media:focus-visible {
+  outline-offset: 3px;
+}
+
+/* Top corner by default, where the card overlapping the photo's lower edge
+   cannot cover it; the stage moves it down once the card sits to the side. */
+.slide-media-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  background: rgba(12, 13, 15, 0.78);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  font-variation-settings: 'wdth' 85;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  transition: opacity 0.4s, background-color 0.2s;
+}
+
+.slide-media:hover .slide-media-badge {
+  background: rgba(12, 13, 15, 0.92);
+}
+
+.slide-media-badge svg {
+  width: 15px;
+  height: 15px;
+}
+
+.slide-card {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: -36px 14px 0;
+  padding: clamp(22px, 2vw, 30px);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+}
+
+.slide-kicker {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  font-size: 12px;
+  font-variation-settings: 'wdth' 85;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.slide-num {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.slide-title {
+  margin: 0 0 2px;
+  font-size: clamp(22px, 2vw, 28px);
+  font-variation-settings: 'wdth' 106;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  color: var(--ink);
+}
+
+.slide-body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.slide-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slide-tags li {
+  padding: 4px 9px;
+  border: 1px solid var(--rule);
+  font-size: 12px;
+  font-variation-settings: 'wdth' 85;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+}
+
+.slide-more {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 0 0 3px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  font: inherit;
+  font-size: 14px;
+  color: var(--signal);
+  cursor: pointer;
+  transition: border-color 0.2s, opacity 0.4s;
+}
+
+.slide-more:hover,
+.slide-more:focus-visible {
+  border-color: var(--signal);
+}
+
+.slide-more-count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border: 1px solid var(--rule);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  text-align: center;
+}
+
+/* -- slide, stage: card on the left, the larger photo behind it on the right -- */
+
+/* The neighbours are not cut off by the screen edge, they dissolve into it.
+   The centred project never reaches either fade. */
+.showcase.is-stage .showcase-viewport {
+  overflow: clip;
+  scroll-snap-type: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 17%, #000 83%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 17%, #000 83%, transparent 100%);
+}
+
+.showcase.is-stage .showcase-stage {
+  position: relative;
+  display: block;
+  width: auto;
+  height: calc(var(--photo-w) * 0.75);
+  padding: 0;
+}
+
+.showcase.is-stage .slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--hang) + var(--photo-w));
+  height: 100%;
+  transform-origin: left center;
+  will-change: transform, opacity;
+}
+
+.showcase.is-stage .slide-media {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--photo-w);
+  height: 100%;
+  aspect-ratio: auto;
+  order: 0;
+}
+
+.showcase.is-stage .slide-media-badge {
+  top: auto;
+  bottom: 14px;
+}
+
+.showcase.is-stage .slide-card {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--card-w);
+  max-height: calc(100% - 32px);
+  margin: 0;
+  translate: 0 -50%;
+  /* The one shadow on the page: the card sits on the photo and has to read
+     as a layer above it, not a hole in it. */
+  box-shadow: 0 34px 70px -34px rgba(0, 0, 0, 0.9);
+}
+
+/* A slide that is not in front is a preview: the whole of it is the control
+   that brings it forward, so the controls inside it step out of the way. */
+.showcase.is-stage .slide:not(.is-current),
+.showcase.is-stage .slide:not(.is-current) .slide-media {
+  cursor: pointer;
+}
+
+.showcase.is-stage .slide:not(.is-current) .slide-media-badge,
+.showcase.is-stage .slide:not(.is-current) .slide-more {
+  opacity: 0;
+}
+
+.showcase.is-stage .slide:not(.is-current) .slide-media img {
+  transform: none;
+}
+
+/* --- lightbox ---
+   A project's screenshots, full screen. A native modal <dialog>, so it lives
+   in the top layer above every pin and transform on the page.               */
+
+html.is-scroll-locked {
+  overflow: hidden;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(9, 10, 12, 0.95);
+  color: var(--ink);
+  overscroll-behavior: contain;
+}
+
+.lightbox[open] {
+  display: flex;
+  animation: lightbox-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+.lightbox-frame {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: clamp(14px, 2.6vh, 26px);
+  width: 100%;
+  height: 100%;
+  padding: clamp(16px, 3.4vh, 34px) var(--gutter);
+}
+
+.lightbox-bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.lightbox-heading {
+  margin-right: auto;
+  min-width: 0;
+}
+
+.lightbox-kicker {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-variation-settings: 'wdth' 85;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.lightbox-title {
+  margin: 0;
+  font-size: clamp(19px, 1.8vw, 24px);
+  font-variation-settings: 'wdth' 106;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.lightbox-count {
+  margin: 0;
+  font-size: 13px;
+  font-variation-settings: 'wdth' 85;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+}
+
+.lightbox-count span {
+  color: var(--ink-2);
+}
+
+.lightbox-close,
+.lightbox-arrow {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: rgba(20, 21, 24, 0.8);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s, opacity 0.2s;
+}
+
+.lightbox-close {
+  width: 42px;
+  height: 42px;
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus-visible,
+.lightbox-arrow:hover:not(:disabled),
+.lightbox-arrow:focus-visible {
+  border-color: var(--ink-2);
+  background: var(--surface);
+}
+
+.lightbox-stage {
+  position: relative;
+  min-height: 0;
+}
+
+.lightbox-strip {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.lightbox-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.lightbox-shot {
+  flex: 0 0 100%;
+  height: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0 72px;
+  display: grid;
+  place-items: center;
+  scroll-snap-align: center;
+}
+
+.lightbox-shot img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border: 1px solid var(--rule);
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.95);
+}
+
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  translate: 0 -50%;
+}
+
+.lightbox-arrow.is-prev {
+  left: 0;
+}
+
+.lightbox-arrow.is-next {
+  right: 0;
+}
+
+.lightbox-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.lightbox-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px 40px;
+  padding: 0 72px;
+}
+
+.lightbox-caption {
+  max-width: 68ch;
+  margin: 0;
+  min-height: 3.2em;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  animation: caption-in 0.45s ease;
+}
+
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.lightbox-thumbs {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+.lightbox-thumbs button {
+  width: 76px;
+  aspect-ratio: 16 / 10;
+  padding: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 0.25s, border-color 0.25s;
+}
+
+.lightbox-thumbs button:hover,
+.lightbox-thumbs button:focus-visible {
+  opacity: 0.8;
+}
+
+.lightbox-thumbs button.is-on {
+  opacity: 1;
+  border-color: var(--accent);
+}
+
+.lightbox-thumbs img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* --- about --- */
 
 .about-grid {
@@ -762,8 +1385,8 @@ a {
   .hero-glow {
     background: radial-gradient(
       ellipse 130% 30% at calc(50% + var(--gx, 0vw)) calc(15% + var(--gy, 0vh)),
-      rgba(200, 205, 212, 0.1) 0%,
-      rgba(200, 205, 212, 0) 70%
+      rgba(var(--light-rgb, 200, 205, 212), 0.1) 0%,
+      rgba(var(--light-rgb, 200, 205, 212), 0) 70%
     );
   }
 }
@@ -791,6 +1414,27 @@ a {
   .cells-3,
   .cells-2 {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Most of a slide in view and a sliver of the next, which is what tells a
+     thumb there is more to the side. */
+  .slide {
+    width: min(82vw, 400px);
+  }
+
+  .lightbox-shot,
+  .lightbox-foot {
+    padding-inline: 0;
+  }
+
+  .lightbox-foot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* A thumb swipes the strip; the arrows would only sit on the picture. */
+  .lightbox-arrow {
+    display: none;
   }
 }
 
@@ -1011,6 +1655,27 @@ a {
 
   .stream-w.is-cursor::after {
     display: none;
+  }
+
+  /* The showcase steps from project to project; nothing glides or drifts. */
+  .slide-media img,
+  .slide-media-badge,
+  .slide-more,
+  .showcase-nav button,
+  .lightbox-close,
+  .lightbox-arrow,
+  .lightbox-thumbs button {
+    transition: none;
+  }
+
+  .slide-media:hover img,
+  .slide-media:focus-visible img {
+    transform: none;
+  }
+
+  .lightbox[open],
+  .lightbox-caption {
+    animation: none;
   }
 
   * {

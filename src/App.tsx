@@ -8,6 +8,7 @@ import ParticleField from './components/ParticleField'
 import HeroBeam from './components/HeroBeam'
 import Stream from './components/Stream'
 import Panel from './components/Panel'
+import Showcase from './components/Showcase'
 import ScratchPortrait from './components/ScratchPortrait'
 import {
   getServerTuning,
@@ -15,6 +16,7 @@ import {
   hydrateTuning,
   subscribe as subscribeTuning,
 } from './lib/heroTuning'
+import { setLenis } from './lib/scroll'
 import { profile, projects, employment, education, skills, languages } from './data'
 
 // Design panel. Its own chunk, and only ever requested with ?tune in the URL,
@@ -83,6 +85,7 @@ export default function App() {
 
     if (!reduced) {
       lenis = new Lenis({ duration: 1.05, smoothWheel: true })
+      setLenis(lenis)
       const loop = (time: number) => {
         lenis?.raf(time)
 
@@ -263,6 +266,7 @@ export default function App() {
       cancelAnimationFrame(raf)
       window.removeEventListener('pointermove', onPointer)
       lenis?.destroy()
+      setLenis(null)
     }
   }, [])
 
@@ -283,10 +287,7 @@ export default function App() {
 
         <div className="hero-inner">
           <div className="hero-figure" ref={figure}>
-            {/* Numbered stand-ins are in public/ for now, so the alt text
-                describes those and not a portrait that is not there. Put the
-                name back when `npm run build:circle` replaces them. */}
-            <ScratchPortrait alt="Portrait placeholder" />
+            <ScratchPortrait alt={`Portrait of ${profile.name}`} />
           </div>
 
           <div className="hero-text">
@@ -323,32 +324,7 @@ export default function App() {
         </Panel>
 
         <Panel id="projects" index={2} label="Projects">
-          <ol className="cells cells-3">
-            {projects.map((p, i) => (
-              <li className="cell" key={p.title} data-project={i} data-rise>
-                <div className="cell-head">
-                  <h3>{p.title}</h3>
-                  <span className="project-status">{p.status}</span>
-                </div>
-                <p>{p.body}</p>
-                <ul className="stack">
-                  {p.stack.map((s) => (
-                    <li key={s}>{s}</li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-
-            {/* Five projects in a three-column grid leaves a hole. This fills
-                it with the work that was only ever a list of nouns anyway. */}
-            <li className="cell cell-quiet" data-rise>
-              <p>
-                Also: MediaWiki extensions in PHP and JavaScript, WordPress and React
-                builds for small businesses, and competitive programming in Python, C#,
-                and Java.
-              </p>
-            </li>
-          </ol>
+          <Showcase label="Projects" projects={projects} />
         </Panel>
 
         <Panel id="experience" index={3} label="Experience">

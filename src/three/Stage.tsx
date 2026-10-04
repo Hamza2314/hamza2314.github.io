@@ -168,32 +168,45 @@ export default function Stage({ reduced, visible, onContextLost }: StageProps) {
 
     ctx.projects = new Array<number>(projectEls.length).fill(0)
 
+    // Projects in a horizontal showcase travel sideways, not up the page, so
+    // their progress is read along x. They all share one height there, too,
+    // which leaves "nearest the vertical middle" meaningless: the showcase marks
+    // its current project with data-current instead, and that wins.
+    const sideways = projectEls.map((el) => !!el.closest('[data-axis="x"]'))
+
     const measureScroll = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight
       ctx.progress = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0
 
-      const mid = window.innerHeight / 2
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const mid = vh / 2
       let best = -1
       let bestDist = Infinity
+      let bestFlagged = false
       let presence = 0
 
       for (let i = 0; i < projectEls.length; i++) {
-        const r = projectEls[i].getBoundingClientRect()
+        const el = projectEls[i]
+        const r = el.getBoundingClientRect()
 
-        // 0 as the element's top reaches the bottom of the viewport,
-        // 1 as its bottom clears the top.
-        const span = r.height + window.innerHeight
-        const travelled = window.innerHeight - r.top
-        ctx.projects[i] = Math.min(Math.max(travelled / span, 0), 1)
-
-        const centre = r.top + r.height / 2
-        const dist = Math.abs(centre - mid)
+        // 0 as the element's leading edge enters the viewport, 1 as its
+        // trailing edge leaves: bottom to top, or right to left on a timeline.
+        ctx.projects[i] = sideways[i]
+          ? Math.min(Math.max((vw - r.left) / (r.width + vw), 0), 1)
+          : Math.min(Math.max((vh - r.top) / (r.height + vh), 0), 1)
 
         // Only claim the slot while the element genuinely overlaps the viewport.
-        if (r.bottom > 0 && r.top < window.innerHeight && dist < bestDist) {
+        if (r.bottom <= 0 || r.top >= vh || r.right <= 0 || r.left >= vw) continue
+
+        const dist = Math.abs(r.top + r.height / 2 - mid)
+        const flagged = el.dataset.current === 'true'
+
+        if ((flagged && !bestFlagged) || (flagged === bestFlagged && dist < bestDist)) {
           bestDist = dist
+          bestFlagged = flagged
           best = i
-          presence = Math.max(presence, 1 - Math.min(dist / window.innerHeight, 1))
+          presence = 1 - Math.min(dist / vh, 1)
         }
       }
 
@@ -205,6 +218,9 @@ export default function Stage({ reduced, visible, onContextLost }: StageProps) {
       window.addEventListener('scroll', measureScroll, { passive: true })
     }
     window.addEventListener('resize', measureScroll, { passive: true })
+    // Named rather than imported: importing Showcase here would pull React
+    // components into the three.js chunk for the sake of one string.
+    window.addEventListener('showcase:move', measureScroll)
 
     // --- pointer ------------------------------------------------------------
     const onMove = (e: PointerEvent) => {
@@ -258,6 +274,7 @@ export default function Stage({ reduced, visible, onContextLost }: StageProps) {
       themeQuery.removeEventListener('change', onTheme)
       window.removeEventListener('scroll', measureScroll)
       window.removeEventListener('resize', measureScroll)
+      window.removeEventListener('showcase:move', measureScroll)
       window.removeEventListener('pointermove', onMove)
       renderer.domElement.removeEventListener('webglcontextlost', onLost)
 

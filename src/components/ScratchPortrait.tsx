@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getTuning } from '../lib/heroTuning'
+import { DEFAULT_LIGHT, setLight, type RGB } from '../lib/heroLight'
 import { useReducedMotion } from '../lib/useReducedMotion'
 
 /**
@@ -26,6 +27,17 @@ import { useReducedMotion } from '../lib/useReducedMotion'
 
 /** Built by scripts/build-circle-photos.mjs, aligned head-to-head. */
 const PHOTOS = ['circle-1', 'circle-2', 'circle-3']
+
+/**
+ * The colour the hero's light takes while each photo is showing, index-aligned
+ * with PHOTOS: the office keeps the original silver, the forest leans green,
+ * the beach leans blue. Pale on purpose: this is a tint on a light, not a
+ * colour on the page, and anything stronger turns the shaft into a spotlight.
+ */
+const LIGHTS: RGB[] = [DEFAULT_LIGHT, [182, 214, 180], [176, 202, 230]]
+
+/** How much longer than the dissolve the light takes to settle. */
+const LIGHT_LAG = 1.3
 const WIDTHS = [200, 400, 600]
 
 /** Below this the mask is empty enough that there is nothing to resolve. */
@@ -223,6 +235,10 @@ export default function ScratchPortrait({ alt }: { alt: string }) {
     const startResolve = () => {
       if (resolving || scratched < SCRATCH_FLOOR) return
       resolving = true
+      // The light starts turning with the dissolve and settles a little after
+      // it, so the colour change reads as caused by the photo, not beside it.
+      const incoming = LIGHTS[after(top)] ?? DEFAULT_LIGHT
+      setLight(incoming, getTuning().resolveTime * LIGHT_LAG)
       wake()
     }
 
