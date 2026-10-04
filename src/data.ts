@@ -68,7 +68,7 @@ export const projects: Project[] = [
     slug: 'mender',
     title: 'Mender',
     status: 'Prototype',
-    body: 'Browser automation across isolated account profiles. A selector health system detects and repairs broken DOM selectors as target sites change, so failures surface instead of passing silently.',
+    body: "A workspace for social media agencies managing many client accounts across Twitter/X, Instagram and TikTok. Teams plan campaigns, draft content with AI, and schedule posting and community engagement from one dashboard. Each client's account stays in its own separate session. Built solo.",
     stack: ['TypeScript', 'Electron', 'SQLite', 'Playwright'],
     shots: [
       {
