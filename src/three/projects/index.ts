@@ -1,10 +1,10 @@
 import type { Color, Object3D } from 'three'
 import type { FrameContext, SceneItem } from '../types'
 import { createExcessus } from './excessus'
-import { createPhantom } from './phantom'
+import { createMender } from './mender'
 import { createGeoSearch } from './geosearch'
 import { createPipeline } from './pipeline'
-import { createEmail } from './email'
+import { createSeal } from './seal'
 
 /**
  * One 3D object per project, index-aligned with `projects` in src/data.ts.
@@ -18,10 +18,10 @@ type Factory = (color: Color) => SceneItem
 // Index-aligned with `projects` in src/data.ts.
 const FACTORIES: Factory[] = [
   createExcessus,
-  createPhantom,
+  createMender,
   createGeoSearch,
   createPipeline,
-  createEmail,
+  createSeal,
 ]
 
 export function createProjectItems(color: Color): SceneItem[] {

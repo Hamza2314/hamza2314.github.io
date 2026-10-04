@@ -21,10 +21,10 @@ const H = 1000
 
 const PROJECTS = [
   { slug: 'excessus', title: 'Excessus', hue: 212 },
-  { slug: 'phantom', title: 'Phantom', hue: 265 },
+  { slug: 'mender', title: 'Mender', hue: 265 },
   { slug: 'geosearch', title: 'Geographic AI search', hue: 165 },
   { slug: 'pipeline', title: 'Content pipeline', hue: 32 },
-  { slug: 'email', title: 'Email manager', hue: 340 },
+  { slug: 'seal', title: 'Seal tracking', hue: 340 },
 ]
 
 const COUNT = 3

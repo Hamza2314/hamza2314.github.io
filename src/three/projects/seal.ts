@@ -3,10 +3,10 @@ import { makePointMaterial } from '../materials'
 import type { FrameContext, SceneItem } from '../types'
 
 /**
- * German-language email manager: classification by semantic content.
+ * Seal tracking: segmenting animals out of drone footage without labels.
  *
  * A disordered cloud of particles sorts itself into four separated clusters as
- * the section scrolls. Unsorted in, sorted out.
+ * the section scrolls, the way features separate into one segment per seal.
  */
 
 const PARTICLES = 420
@@ -20,7 +20,7 @@ const CENTRES: [number, number, number][] = [
   [0.78, -0.5, 0],
 ]
 
-export function createEmail(color: Color): SceneItem {
+export function createSeal(color: Color): SceneItem {
   const group = new Group()
 
   const positions = new Float32Array(PARTICLES * 3)

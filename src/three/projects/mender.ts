@@ -3,7 +3,7 @@ import { makeLineMaterial, makePointMaterial } from '../materials'
 import type { FrameContext, SceneItem } from '../types'
 
 /**
- * Phantom: browser automation whose selectors repair themselves.
+ * Mender: browser automation whose selectors repair themselves.
  *
  * A lattice whose edges snap and reform continuously. Nothing ever settles,
  * but the structure never falls apart either: it degrades visibly and heals.
@@ -15,7 +15,7 @@ const BREAK_SPEED = 0.17
 
 type Edge = { a: number; b: number; offset: number }
 
-export function createPhantom(color: Color): SceneItem {
+export function createMender(color: Color): SceneItem {
   const group = new Group()
 
   // --- nodes on a rough shell ---
