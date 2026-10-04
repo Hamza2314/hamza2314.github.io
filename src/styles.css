@@ -521,6 +521,29 @@ a {
   color: var(--ink-2);
 }
 
+/* --- education --- */
+
+.edu-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* The same family as the place it sits above, one step up in size: a grade is
+   the thing a reader goes looking for, and the condensed width axis is what
+   marks everything in this design as metadata rather than prose.
+
+   Scoped to .cell because this is a <p> and `.cell p` would otherwise win the
+   size on specificity, leaving the rule below saying one thing and the page
+   doing another. 14px sits between the 13px place under it and the 15px prose
+   it is not. */
+.cell .edu-grade {
+  margin: 0;
+  font-size: 14px;
+  font-variation-settings: 'wdth' 85;
+  color: var(--ink-2);
+}
+
 /* --- experience ---
    Grouped by employer instead of one card per job. Three roles at one company
    are three promotions, and a flat list of cards says so three times without

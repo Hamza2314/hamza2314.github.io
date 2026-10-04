@@ -388,17 +388,18 @@ export default function App() {
         </Panel>
 
         <Panel id="education" index={4} label="Education">
-          <ol className="cells cells-3">
+          <ol className="cells cells-2">
             {education.map((e) => (
               <li className="cell" key={e.title} data-rise>
                 <p className="cell-key">{e.period}</p>
-                <div className="cell-head">
-                  <h3>{e.title}</h3>
+                <h3>{e.title}</h3>
+                {/* Grade above the place, and tied to it: one stack with its
+                    own tight gap, so the cell's own spacing does not push the
+                    two apart. */}
+                <div className="edu-meta">
+                  {e.grade && <p className="edu-grade">{e.grade}</p>}
                   <span className="org">{e.org}</span>
                 </div>
-                {/* Same markup an Experience cell already uses for its body, so
-                    this adds copy rather than a layout. Absent on the German
-                    course, which has nothing to add beyond its title. */}
                 {e.body && <p>{e.body}</p>}
               </li>
             ))}

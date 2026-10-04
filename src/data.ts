@@ -122,27 +122,39 @@ export type Education = {
   period: string
   title: string
   org: string
+  /** Its own line above the place, rather than tacked onto the title. */
+  grade?: string
   /** Absent where there is nothing to add beyond the title. */
   body?: string
 }
 
+/** Oldest first, so the row reads forward in time from left to right. */
 export const education: Education[] = [
+  {
+    period: '2012 — 2018',
+    title: 'Shuafat High School',
+    org: 'Jerusalem',
+    grade: 'Average grade 1.6',
+    body: 'Main subjects: computer science, mathematics, and physics, with further computer science electives taken beyond the required syllabus.',
+  },
+  {
+    period: '2018 — 2019',
+    title: 'Intensive German A1 to B2',
+    org: 'Rostock',
+    grade: 'Final grade 1.3',
+  },
+  {
+    period: '2020 — 2024',
+    title: 'B.Sc. Computer Science',
+    org: 'University of Rostock',
+    grade: 'Final grade 1.8',
+    body: 'Focus areas: AI systems, software development, databases, algorithms, and data security.',
+  },
   {
     period: '2024 — 2027 (expected)',
     title: 'M.Sc. Computer Science',
     org: 'University of Rostock',
     body: 'Master’s thesis: Context Provisioning for Self-Hosted Coding Agents under Resource Constraints: A Controlled Experimental Study.',
-  },
-  {
-    period: '2020 — 2024',
-    title: 'B.Sc. Computer Science, final grade 1.8',
-    org: 'University of Rostock',
-    body: 'Focus areas: AI systems, software development, databases, algorithms, and data security.',
-  },
-  {
-    period: '2018 — 2019',
-    title: 'Intensive German A1 to B2, final grade 1.3',
-    org: 'Rostock',
   },
 ]
 
