@@ -111,7 +111,7 @@ export const projects: Project[] = [
     slug: 'pipeline',
     title: 'Content pipeline',
     status: 'Freelance',
-    body: 'Five-stage LLM pipeline for specialized legal texts: outline, generation, legal review, SEO rework, final pass. Each stage has its own prompt and validation, running on streaming Claude API calls. Delivered with frontend and technical documentation.',
+    body: 'Five-stage LLM pipeline for specialized legal texts: outline, generation, legal review, SEO rework, final pass. Each stage has its own prompt and validation, running on streaming Claude API calls. Delivered with frontend and technical documentation. Built solo.',
     stack: ['Claude API', 'Python', 'Prompt engineering'],
     shots: [
       {
