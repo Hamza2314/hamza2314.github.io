@@ -12,7 +12,7 @@ export const profile = {
   links: {
     email: 'hamza1133@live.com',
     linkedin: 'https://www.linkedin.com/in/hamza-masri-945264240/',
-    github: 'https://github.com/HamzaMasri-Tech',
+    github: 'https://github.com/Hamza2314',
     cv: '/HamzaMasri_CV.pdf',
   },
 }
